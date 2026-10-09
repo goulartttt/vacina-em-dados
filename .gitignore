@@ -43,3 +43,8 @@ next-env.d.ts
 
 # claude code (configurações locais desta máquina)
 .claude/settings.local.json
+
+# rotinas de coleta (python)
+pipeline/.venv/
+pipeline/dados/
+__pycache__/

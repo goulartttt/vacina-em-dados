@@ -1,0 +1,47 @@
+# Coleta semanal dos dados oficiais e gravação no Supabase.
+# Rodar toda semana também evita que o Supabase gratuito pause por inatividade.
+name: Coleta de dados
+
+on:
+  schedule:
+    - cron: "0 9 * * 1" # toda segunda-feira, 6h no horário de Brasília
+  workflow_dispatch: # botão "Run workflow" para rodar na hora
+
+# Menor permissão possível: só ler o código do repositório.
+permissions:
+  contents: read
+
+# Nunca duas coletas ao mesmo tempo gravando no banco.
+concurrency:
+  group: coleta
+  cancel-in-progress: false
+
+jobs:
+  coleta:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: pipeline
+    steps:
+      # Actions fixadas por hash: uma tag pode ser movida, um hash não.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+
+      - name: Instalar dependências (conferidas por hash)
+        run: pip install --require-hashes -r requirements.txt
+
+      - name: Testes
+        run: python -m unittest discover -s tests
+
+      - name: Coletar e gravar
+        run: python -m coleta tudo
+        env:
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+          COLETA_DB_HOST: ${{ vars.COLETA_DB_HOST }}
+          COLETA_DB_PASSWORD: ${{ secrets.COLETA_DB_PASSWORD }}
