@@ -3,6 +3,8 @@
 import ftplib
 import gzip
 import json
+import time
+import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -56,11 +58,20 @@ def _data_ftp(ftp: ftplib.FTP, nome: str) -> datetime | None:
         return None
 
 
-def json_https(url: str) -> object:
+def json_https(url: str, tentativas: int = 3) -> object:
+    """Baixa e lê um JSON. Falhas de rede passageiras ganham novas tentativas,
+    com espera crescente (as APIs do governo oscilam)."""
     if not url.startswith("https://"):
         raise ValueError("só aceitamos fontes via HTTPS")
-    with urllib.request.urlopen(url, timeout=TIMEOUT) as resposta:
-        corpo = resposta.read()
+    for tentativa in range(1, tentativas + 1):
+        try:
+            with urllib.request.urlopen(url, timeout=TIMEOUT) as resposta:
+                corpo = resposta.read()
+            break
+        except (urllib.error.URLError, TimeoutError, ConnectionError):
+            if tentativa == tentativas:
+                raise
+            time.sleep(5 * tentativa)
     if corpo[:2] == b"\x1f\x8b":  # o IBGE responde em gzip mesmo sem pedirmos
         corpo = gzip.decompress(corpo)
     return json.loads(corpo)

@@ -29,7 +29,9 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
+    // Localização só para o próprio site (botão "Perto de mim" das UBS; a
+    // conta da distância é feita no navegador e nada é enviado).
+    value: "camera=(), microphone=(), geolocation=(self), browsing-topics=()",
   },
   {
     key: "Strict-Transport-Security",
