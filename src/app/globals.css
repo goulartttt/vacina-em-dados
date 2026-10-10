@@ -1,0 +1,329 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Painel vivo: só tema claro (em saúde, o escuro foi lido como negativo).
+   Azul-vacina para a marca e as ações; as três cores de situação
+   (adequado, alerta, crítico) são reservadas para a situação da cobertura
+   e nunca viram decoração. Situação sempre vem com ícone e palavra.
+   Coral só para casos de doença. Decisão registrada no CLAUDE.md
+   (rodada 4) e no DESIGN.md.
+   ------------------------------------------------------------------ */
+:root {
+  --fundo: #f5f8fc;
+  --folha: #ffffff;
+  --tinta: #172133;
+  --tinta-2: #3a475c;
+  --tinta-3: #4f5d74;
+  --linha: #dce4f0;
+  --grade: #eef2f7;
+
+  --azul: #2156d9;
+  --azul-escuro: #1a45b0;
+  --azul-claro: #e6eeff;
+  --lilas: #7357e8;
+  --lilas-escuro: #5b3fd6;
+  --lilas-claro: #efebfe;
+
+  --ok: #23a061;
+  --ok-tinta: #11703e;
+  --ok-fundo: #e3f5eb;
+  --ok-borda: #bfe5cf;
+  --alerta: #f2a900;
+  --alerta-tinta: #865300;
+  --alerta-fundo: #fff4d6;
+  --alerta-borda: #f3d98f;
+  --critico: #c62e40;
+  --critico-tinta: #a51d31;
+  --critico-fundo: #fde8ea;
+  --critico-borda: #f3bcc3;
+  --vazio: #d5dbe1;
+
+  /* Casos (mapa e barras): coral, do claro ao escuro. */
+  --casos: #d9480f;
+  --casos-tinta: #b03a0c;
+  --casos-0: #dfe6ef;
+  --casos-1: #ffe1cf;
+  --casos-2: #ffad80;
+  --casos-3: #f2703d;
+  --casos-4: #c2410c;
+
+  --foco: #1a45b0;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-fundo: var(--fundo);
+  --color-folha: var(--folha);
+  --color-tinta: var(--tinta);
+  --color-tinta-2: var(--tinta-2);
+  --color-tinta-3: var(--tinta-3);
+  --color-linha: var(--linha);
+  --color-grade: var(--grade);
+  --color-azul: var(--azul);
+  --color-azul-escuro: var(--azul-escuro);
+  --color-azul-claro: var(--azul-claro);
+  --color-lilas: var(--lilas);
+  --color-lilas-escuro: var(--lilas-escuro);
+  --color-lilas-claro: var(--lilas-claro);
+  --color-ok: var(--ok);
+  --color-ok-tinta: var(--ok-tinta);
+  --color-ok-fundo: var(--ok-fundo);
+  --color-ok-borda: var(--ok-borda);
+  --color-alerta: var(--alerta);
+  --color-alerta-tinta: var(--alerta-tinta);
+  --color-alerta-fundo: var(--alerta-fundo);
+  --color-alerta-borda: var(--alerta-borda);
+  --color-critico: var(--critico);
+  --color-critico-tinta: var(--critico-tinta);
+  --color-critico-fundo: var(--critico-fundo);
+  --color-critico-borda: var(--critico-borda);
+  --color-vazio: var(--vazio);
+  --color-casos: var(--casos);
+  --color-casos-tinta: var(--casos-tinta);
+  --font-sans: var(--fonte-texto);
+  --font-titulo: var(--fonte-titulo);
+  --ease-assenta: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ----------------------------- base ------------------------------ */
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 6rem;
+}
+
+body {
+  background: var(--fundo);
+  color: var(--tinta);
+  font-family: var(--fonte-texto), system-ui, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  caret-color: var(--azul);
+}
+
+::selection {
+  background: var(--azul);
+  color: var(--folha);
+}
+
+:focus-visible {
+  outline: 2px solid var(--foco);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+@layer components {
+  /* Títulos e números grandes. */
+  .titulo {
+    font-family: var(--fonte-titulo), var(--fonte-texto), sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+  }
+
+  .numero {
+    font-family: var(--fonte-titulo), var(--fonte-texto), sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    font-variant-numeric: lining-nums;
+  }
+
+  /* Rótulo curto em caixa alta (filtros, colunas). */
+  .rotulo {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--tinta-3);
+  }
+
+  .cartao {
+    background: var(--folha);
+    border: 1px solid var(--linha);
+    border-radius: 1.25rem;
+  }
+
+  .etiqueta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    background: var(--azul-claro);
+    color: var(--azul);
+    padding: 0.3rem 0.8rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+
+  .botao {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    border-radius: 0.75rem;
+    padding: 0.5rem 1rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+  }
+
+  .botao-azul {
+    background: var(--azul);
+    color: #fff;
+  }
+
+  .botao-azul:hover {
+    background: var(--azul-escuro);
+  }
+
+  .botao-contorno {
+    border: 1.5px solid var(--azul);
+    color: var(--azul);
+    background: var(--folha);
+  }
+
+  .botao-contorno:hover {
+    background: var(--azul-claro);
+  }
+
+  /* Seletor nativo com a cara dos filtros. */
+  .seletor {
+    appearance: none;
+    background: var(--folha)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='m5.5 8 4.5 4.5L14.5 8' fill='none' stroke='%232156d9' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      no-repeat right 0.6rem center / 1.1rem;
+    border: 1px solid #d3ddeb;
+    border-radius: 0.75rem;
+    padding: 0.5rem 2.2rem 0.5rem 0.8rem;
+    font-weight: 700;
+    color: var(--tinta);
+    min-height: 2.75rem;
+  }
+}
+
+/* ----------------------- barra de anos (dois controles) ----------------------- */
+.faixa-anos {
+  position: relative;
+  height: 2.75rem;
+}
+
+.faixa-anos input[type="range"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  margin: 0;
+  background: none;
+  pointer-events: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.faixa-anos input[type="range"]::-webkit-slider-runnable-track {
+  height: 2.75rem;
+  background: none;
+}
+
+.faixa-anos input[type="range"]::-moz-range-track {
+  background: none;
+}
+
+.faixa-anos input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 0.625rem;
+  border-radius: 50%;
+  background: var(--folha);
+  border: 4px solid var(--azul);
+  cursor: grab;
+  box-shadow: 0 2px 6px rgb(23 33 51 / 0.2);
+}
+
+.faixa-anos input[type="range"]::-moz-range-thumb {
+  pointer-events: auto;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--folha);
+  border: 4px solid var(--azul);
+  cursor: grab;
+  box-shadow: 0 2px 6px rgb(23 33 51 / 0.2);
+}
+
+.faixa-anos input[type="range"]:focus-visible {
+  outline: none;
+}
+
+.faixa-anos input[type="range"]:focus-visible::-webkit-slider-thumb {
+  outline: 3px solid var(--foco);
+  outline-offset: 2px;
+}
+
+.faixa-anos input[type="range"]:focus-visible::-moz-range-thumb {
+  outline: 3px solid var(--foco);
+  outline-offset: 2px;
+}
+
+/* --------------------------- gráficos --------------------------- */
+.grafico text {
+  font-size: 12px;
+  fill: var(--tinta-3);
+}
+
+.grafico .forte {
+  fill: var(--tinta);
+  font-weight: 700;
+}
+
+.grafico .eixo {
+  stroke: var(--linha);
+  shape-rendering: crispEdges;
+}
+
+.grafico .grade-linha {
+  stroke: var(--grade);
+  shape-rendering: crispEdges;
+}
+
+/* Mapa: transição curta de cor ao trocar ano ou modo. */
+.mapa-forma {
+  transition: fill 0.35s var(--ease-assenta);
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.aparece {
+  animation: aparecer 0.35s var(--ease-assenta) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

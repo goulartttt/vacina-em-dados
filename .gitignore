@@ -43,3 +43,12 @@ next-env.d.ts
 
 # claude code (configurações locais desta máquina)
 .claude/settings.local.json
+
+# rotinas de coleta (python)
+pipeline/.venv/
+pipeline/dados/
+__pycache__/
+
+# estado local da ferramenta de design (cache, capturas, rascunhos);
+# os documentos de referência são DESIGN.md e PRODUCT.md
+.impeccable/
