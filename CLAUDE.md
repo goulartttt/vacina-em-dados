@@ -297,8 +297,10 @@ Vale para banco, API, rotinas e front. Não só o básico.
 
 ## Onde paramos (09/10/2026, fim da sessão)
 
-- Rodada 4 (novo visual "Painel vivo", mitos, calendário, UBS) pronta e
-  **não commitada** (o Alexandre pediu tudo local). Roda com
+- Rodada 4 (novo visual "Painel vivo", mitos, calendário, UBS) commitada
+  e enviada em 10/10 (`906cce9`, branch `feature/v1-reconstrucao`) e levada
+  para a `HML-V1.0` (nascida da `main`). Ainda não está na Vercel: o
+  Alexandre só publica quando estiver nos ajustes finais. Roda com
   `npx next dev --port 3001` (no PowerShell, `npm run dev -- --port` perde o `--`).
 - Banco: tabela `ubs` criada (migração `20261009150000_ubs.sql`) e
   preenchida; Security Advisor limpo; escrita com a chave pública recusada.
