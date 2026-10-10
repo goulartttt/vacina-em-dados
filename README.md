@@ -44,6 +44,25 @@ Requisitos: Node.js 22 ou mais recente.
 | `npm run start` | Roda a versão de produção gerada pelo build |
 | `npm run lint`  | Verifica o código com o ESLint              |
 
+## Rotinas de dados (`pipeline/`)
+
+Python 3.14, sem dependências além do `psycopg`. Rodam toda segunda-feira no
+GitHub Actions (`.github/workflows/coleta.yml`) e também podem rodar à mão:
+
+```bash
+cd pipeline
+python -m venv .venv
+.venv\Scripts\activate            # Windows (no Linux/macOS: source .venv/bin/activate)
+pip install --require-hashes -r requirements.txt
+python -m unittest discover -s tests
+python -m coleta tudo             # ou: territorios | cobertura | sarampo
+```
+
+As rotinas gravam no banco com o usuário `coleta`, que só escreve nas
+tabelas de dados. A senha dele é gerada por `python definir_senha_coleta.py`,
+que a grava no `.env.local` e nos segredos do GitHub sem exibi-la. O esquema
+do banco fica em `supabase/migrations/`.
+
 ## Fontes de dados
 
 Todos os números vêm de fontes públicas oficiais. A lista completa, com a
