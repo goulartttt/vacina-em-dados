@@ -35,7 +35,7 @@ export function TabelaRegioes({
   return (
     <div>
       {comFiltro && (
-        <label className="mb-3 flex max-w-sm items-center gap-2 rounded-xl border border-linha bg-folha px-3 py-2 focus-within:border-azul">
+        <label className="mb-3 flex max-w-sm items-center gap-2 rounded-lg border border-linha bg-folha px-3 py-2 focus-within:border-azul">
           <Icone nome="busca" className="size-4 text-tinta-3" />
           <span className="sr-only">Filtrar {coluna.toLowerCase()}</span>
           <input
@@ -47,7 +47,9 @@ export function TabelaRegioes({
           />
         </label>
       )}
-      <div className={`overflow-auto rounded-xl border border-linha ${comFiltro ? "max-h-[30rem]" : ""}`}>
+      {/* Altura fixa com rolagem própria: a página não fica enorme e quem
+          quiser ver todos rola dentro da tabela (o cabeçalho fica parado). */}
+      <div tabIndex={0} aria-label="Tabela com rolagem" className="max-h-[25rem] overflow-auto rounded-lg border border-linha">
         <table className="w-full min-w-[34rem] border-collapse text-left text-[0.9375rem]">
           <caption className="sr-only">
             {modo === "vacinacao" ? `Cobertura vacinal em ${inicio} e ${fim}` : `Casos de sarampo em ${inicio} e ${fim}`}, por {coluna.toLowerCase()}

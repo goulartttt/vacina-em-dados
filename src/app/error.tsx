@@ -15,10 +15,7 @@ export default function Erro({ error, retry }: { error: Error & { digest?: strin
 
   return (
     <div className="mx-auto max-w-xl px-4 pt-16 sm:px-6">
-      <span className="grid size-14 place-items-center rounded-2xl bg-alerta-fundo text-alerta-tinta" aria-hidden="true">
-        <Icone nome="alerta" className="size-7" />
-      </span>
-      <h1 className="titulo mt-4 text-4xl">Não foi possível carregar os dados agora</h1>
+      <h1 className="titulo text-[2rem] sm:text-4xl">Não foi possível carregar os dados agora</h1>
       <p className="mt-3 text-lg text-tinta-2">
         A conexão com a fonte dos números falhou por um instante. Isso costuma passar sozinho: tente de novo em alguns segundos.
       </p>

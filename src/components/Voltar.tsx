@@ -7,7 +7,7 @@ export function Voltar({ href, rotulo }: { href: string; rotulo: string }) {
   return (
     <Link
       href={href}
-      className="group inline-flex min-h-10 items-center gap-2 rounded-full border border-linha bg-folha px-4 py-2 text-sm font-bold text-tinta-2 no-underline transition-colors hover:border-azul hover:text-azul"
+      className="group inline-flex min-h-10 items-center gap-2 rounded-md border border-linha bg-folha px-3 py-2 text-sm font-semibold text-tinta-2 no-underline transition-colors hover:border-azul hover:text-azul"
     >
       <Icone nome="seta" className="size-4 rotate-180 transition-transform group-hover:-translate-x-0.5" />
       {rotulo}

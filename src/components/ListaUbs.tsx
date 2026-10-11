@@ -92,13 +92,13 @@ export function ListaUbs({ ubs, cidade }: { ubs: Ubs[]; cidade: string }) {
   };
 
   if (ubs.length === 0) {
-    return <p className="rounded-2xl bg-fundo p-4 text-tinta-2">Ainda não há UBS desta cidade no cadastro carregado. Procure a secretaria de saúde do município.</p>;
+    return <p className="rounded-lg bg-fundo p-4 text-tinta-2">Ainda não há UBS desta cidade no cadastro carregado. Procure a secretaria de saúde do município.</p>;
   }
 
   return (
     <div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <label className="flex min-h-12 flex-1 items-center gap-2 rounded-full border border-[#d3ddeb] bg-fundo px-4 focus-within:border-azul focus-within:bg-folha">
+        <label className="flex min-h-12 flex-1 items-center gap-2 rounded-lg border border-campo bg-folha px-4 focus-within:border-azul">
           <Icone nome="busca" className="size-5 text-tinta-3" />
           <span className="sr-only">Filtrar por bairro ou nome da UBS</span>
           <input
@@ -118,7 +118,7 @@ export function ListaUbs({ ubs, cidade }: { ubs: Ubs[]; cidade: string }) {
             ))}
           </datalist>
         </label>
-        <button type="button" onClick={pertoDeMim} className="botao botao-contorno min-h-12 rounded-full" disabled={estado === "procurando"}>
+        <button type="button" onClick={pertoDeMim} className="botao botao-contorno min-h-12" disabled={estado === "procurando"}>
           <Icone nome="local" className="size-5" />
           Perto de mim
         </button>
@@ -131,16 +131,16 @@ export function ListaUbs({ ubs, cidade }: { ubs: Ubs[]; cidade: string }) {
         {lista.length === ubs.length ? `${ubs.length} UBS` : `${lista.length} de ${ubs.length} UBS`}
       </p>
       {lista.length === 0 ? (
-        <p className="mt-2 rounded-2xl bg-fundo p-4 text-tinta-2">Nenhuma UBS com “{filtro}”. Confira a grafia ou tente outro bairro.</p>
+        <p className="mt-2 rounded-lg bg-fundo p-4 text-tinta-2">Nenhuma UBS com “{filtro}”. Confira a grafia ou tente outro bairro.</p>
       ) : (
         <ul className="mt-2 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {lista.slice(0, quantas).map(({ u, km }) => {
             const turno = turnoAmigavel(u.turno);
             return (
-              <li key={u.cnes} className="flex flex-col gap-2 rounded-2xl border border-linha bg-folha p-4">
+              <li key={u.cnes} className="flex flex-col gap-2 rounded-lg border border-linha bg-folha p-4">
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="leading-snug font-bold">{nomeProprio(u.nome)}</h3>
-                  {km !== null && <span className="etiqueta shrink-0 text-[0.8125rem]">{km < 1 ? `${Math.round(km * 1000)} m` : `${decimal(km)} km`}</span>}
+                  {km !== null && <span className="shrink-0 text-[0.875rem] font-semibold text-azul">{km < 1 ? `${Math.round(km * 1000)} m` : `${decimal(km)} km`}</span>}
                 </div>
                 <p className="text-[0.9375rem] text-tinta-2">
                   {u.endereco ? nomeProprio(u.endereco) : "Endereço não informado"}

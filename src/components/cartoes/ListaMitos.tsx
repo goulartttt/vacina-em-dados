@@ -3,24 +3,26 @@ import type { Mito } from "@/conteudo/mitos";
 import { Fonte } from "../Fonte";
 import { Icone } from "../Icone";
 
-/** Grade de mitos: cada cartão revela a resposta ao tocar (funciona sem JavaScript). */
+/** Lista de mitos para ler em sequência: cada frase abre a resposta ao
+ *  tocar (funciona sem JavaScript). O roxo marca só o veredito. */
 export function ListaMitos({ mitos }: { mitos: Mito[] }) {
   return (
-    <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <ol className="cartao max-w-4xl divide-y divide-linha">
       {mitos.map((m) => (
-        <li key={m.id} className="cartao flex flex-col border-[#ddd5fc] bg-lilas-claro p-5">
-          <span className="w-fit rounded-md bg-folha px-2 py-0.5 text-xs font-extrabold tracking-[0.08em] text-lilas-escuro">É VERDADE?</span>
-          <p className="titulo mt-3 text-[1.375rem] leading-[1.2]">“{m.mito}”</p>
-          <details className="group mt-auto pt-4">
-            <summary className="botao w-full cursor-pointer list-none bg-lilas text-white hover:bg-lilas-escuro group-open:hidden">
-              Ver a resposta
+        <li key={m.id}>
+          <details className="group">
+            <summary className="flex cursor-pointer list-none items-start gap-4 px-5 py-5 hover:bg-fundo sm:px-7">
+              <span className="min-w-0 flex-1">
+                <span className="titulo block text-[1.25rem] leading-snug sm:text-[1.375rem]">“{m.mito}”</span>
+                <span className="mt-2 inline-flex items-center gap-1 text-[0.9375rem] font-semibold text-lilas group-open:hidden">
+                  Ver a resposta <Icone nome="chevron" className="size-4" />
+                </span>
+              </span>
             </summary>
-            <div className="aparece rounded-2xl bg-folha p-4">
-              <p className="flex items-center gap-1.5 text-sm font-extrabold tracking-[0.04em] text-lilas-escuro">
-                <Icone nome="fechar" className="size-4" />
-                MITO
+            <div className="aparece px-5 pb-6 sm:px-7">
+              <p className="max-w-[65ch]">
+                <b className="font-titulo text-lilas-escuro">Mito.</b> {m.verdade}
               </p>
-              <p className="mt-1.5">{m.verdade}</p>
               <p className="mt-2">
                 <Fonte fonte={m.fonte} />
               </p>
@@ -28,6 +30,6 @@ export function ListaMitos({ mitos }: { mitos: Mito[] }) {
           </details>
         </li>
       ))}
-    </ul>
+    </ol>
   );
 }

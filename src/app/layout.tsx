@@ -43,7 +43,7 @@ const MENU = [
 function Marca() {
   return (
     <Link href="/" className="flex shrink-0 items-center gap-2.5 text-tinta no-underline" aria-label="Vacina em Dados, página inicial">
-      <span className="grid size-9 place-items-center rounded-[0.7rem] bg-azul text-white" aria-hidden="true">
+      <span className="grid size-9 place-items-center rounded-md bg-azul text-white" aria-hidden="true">
         <Icone nome="escudo" className="size-5" />
       </span>
       <span className="titulo text-[1.25rem]">Vacina em Dados</span>
@@ -81,7 +81,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <ul className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-2 sm:px-6">
               {MENU.map((m) => (
                 <li key={m.href} className="shrink-0">
-                  <Link href={m.href} className="block rounded-full bg-fundo px-3 py-1.5 text-sm font-semibold text-tinta-2 no-underline hover:bg-azul-claro hover:text-azul">
+                  <Link href={m.href} className="block rounded-md px-2.5 py-1.5 text-sm font-semibold text-tinta-2 no-underline hover:bg-azul-claro hover:text-azul">
                     {m.rotulo}
                   </Link>
                 </li>

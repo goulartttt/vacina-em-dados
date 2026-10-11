@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 import { FAIXAS_CASOS, situacao, SITUACOES, type Situacao } from "@/lib/constantes";
 import { decimal, numero, porcentagem } from "@/lib/formato";
@@ -10,9 +10,11 @@ import {
   casosNoPeriodo,
   coberturaEm,
   listaAnos,
+  naDose,
   praticamenteIgual,
   type Anos,
   type DadosRegioes,
+  type Dose,
   type Modo,
   type Serie,
 } from "@/lib/painel";
@@ -25,7 +27,8 @@ import { MapaPainel } from "./MapaPainel";
 import { TabelaRegioes } from "./TabelaRegioes";
 
 export type PropsPainel = {
-  etiqueta: string;
+  /** Doença do painel (ex.: "Sarampo"), na linha de contexto sob o título. */
+  assunto: string;
   titulo: string;
   /** Nome do lugar do painel ("Brasil", "Pará", "Campinas (SP)"). */
   nome: string;
@@ -44,24 +47,57 @@ export type PropsPainel = {
   children?: React.ReactNode;
 };
 
-const TOM: Record<Situacao, string> = {
-  ok: "border-ok-borda bg-[#f3fbf6]",
-  alerta: "border-alerta-borda bg-[#fffaeb]",
-  critico: "border-critico-borda bg-[#fff5f6]",
-  vazio: "border-linha bg-folha",
-};
+/** Período que o painel mostra ao abrir, em cada modo. */
+const periodosPadrao = (anos: Anos): Record<Modo, [number, number]> => ({
+  vacinacao: [Math.max(anos.cobertura[0], anos.cobertura[1] - 6), anos.cobertura[1]],
+  casos: [Math.max(anos.casos[0], anos.casos[1] - 9), anos.casos[1]],
+});
+
+/** Um passo de "Ver os anos passando". */
+const PASSO_MS = 800;
 
 export function Painel(p: PropsPainel) {
   const router = useRouter();
   const idMapa = useId();
-  const [modo, setModo] = useState<Modo>("vacinacao");
-  const [periodos, setPeriodos] = useState<Record<Modo, [number, number]>>({
-    vacinacao: [Math.max(p.anos.cobertura[0], p.anos.cobertura[1] - 6), p.anos.cobertura[1]],
-    casos: [Math.max(p.anos.casos[0], p.anos.casos[1] - 9), p.anos.casos[1]],
-  });
+  const [modo, setModoBruto] = useState<Modo>("vacinacao");
+  const [dose, setDoseBruta] = useState<Dose>(1);
+  const [periodos, setPeriodos] = useState(() => periodosPadrao(p.anos));
   const [baixadas, setBaixadas] = useState<DadosRegioes | null>(null);
   const [erro, setErro] = useState(false);
   const [selecionada, setSelecionada] = useState<number | null>(null);
+  const [tocando, setTocando] = useState(false);
+  const [copiado, setCopiado] = useState(false);
+  const [filtrosAbertos, setFiltrosAbertos] = useState(false); // só no celular
+  const urlLida = useRef(false);
+
+  // Os filtros ficam no endereço (?ver=casos&de=2015&ate=2025&dose=2): um link
+  // compartilhado abre exatamente a mesma visão. Lido depois de abrir, no
+  // navegador, para a página continuar pronta (estática) no servidor.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const ver: Modo = q.get("ver") === "casos" ? "casos" : "vacinacao";
+    const limitesUrl = ver === "vacinacao" ? p.anos.cobertura : p.anos.casos;
+    const ano = (nome: string) => {
+      const v = Number(q.get(nome));
+      return q.has(nome) && Number.isInteger(v) && v >= limitesUrl[0] && v <= limitesUrl[1] ? v : null;
+    };
+    const [de, ate] = [ano("de"), ano("ate")];
+    const doseUrl: Dose = q.get("dose") === "2" ? 2 : 1;
+    // Adiado para depois da primeira pintura: o painel aparece pronto e só
+    // então assume os filtros do link.
+    const t = setTimeout(() => {
+      setModoBruto(ver);
+      setDoseBruta(doseUrl);
+      if (de !== null || ate !== null) {
+        setPeriodos((atual) => {
+          const [i, f] = [de ?? atual[ver][0], ate ?? atual[ver][1]];
+          return { ...atual, [ver]: [Math.min(i, f), Math.max(i, f)] };
+        });
+      }
+      urlLida.current = true;
+    });
+    return () => clearTimeout(t);
+  }, [p.anos]);
 
   useEffect(() => {
     if (p.regioes || !p.regioesUrl) return;
@@ -75,7 +111,9 @@ export function Painel(p: PropsPainel) {
     };
   }, [p.regioes, p.regioesUrl]);
 
-  const dados = p.regioes ?? baixadas;
+  // Tudo abaixo usa a cobertura da dose escolhida (naDose troca a série).
+  const brutos = p.regioes ?? baixadas;
+  const dados = useMemo(() => (brutos && dose === 2 ? { ...brutos, regioes: brutos.regioes.map((r) => naDose(r, 2)) } : brutos), [brutos, dose]);
   const porId = useMemo(() => new Map((dados?.regioes ?? []).map((r) => [r.id, r])), [dados]);
   const temRegioes = Boolean(p.regioes || p.regioesUrl);
   const tipo = p.tipoRegioes ?? "estado";
@@ -85,21 +123,123 @@ export function Painel(p: PropsPainel) {
   const periodo = periodos[modo];
   const [inicio, fim] = periodo;
   const limites = modo === "vacinacao" ? p.anos.cobertura : p.anos.casos;
-  const mudarPeriodo = (v: [number, number]) => setPeriodos((atual) => ({ ...atual, [modo]: v }));
 
-  const principal: Linha = { nome: p.nome, serie: p.principal };
+  // Mexer em qualquer filtro para o "Ver os anos passando".
+  const mudarPeriodo = (v: [number, number]) => {
+    setTocando(false);
+    setPeriodos((atual) => ({ ...atual, [modo]: v }));
+  };
+  const setModo = (m: Modo) => {
+    setTocando(false);
+    setModoBruto(m);
+  };
+  const setDose = (d: Dose) => {
+    setTocando(false);
+    setDoseBruta(d);
+  };
+
+  useEffect(() => {
+    if (!urlLida.current) return;
+    const q = new URLSearchParams(window.location.search);
+    for (const nome of ["ver", "de", "ate", "dose"]) q.delete(nome);
+    const padrao = periodosPadrao(p.anos)[modo];
+    if (modo === "casos") q.set("ver", "casos");
+    if (inicio !== padrao[0] || fim !== padrao[1]) {
+      q.set("de", String(inicio));
+      q.set("ate", String(fim));
+    }
+    if (modo === "vacinacao" && dose === 2) q.set("dose", "2");
+    const busca = q.toString();
+    const novo = `${window.location.pathname}${busca ? `?${busca}` : ""}${window.location.hash}`;
+    if (novo !== `${window.location.pathname}${window.location.search}${window.location.hash}`) {
+      window.history.replaceState(window.history.state, "", novo);
+    }
+  }, [modo, inicio, fim, dose, p.anos]);
+
+  // "Ver os anos passando": avança o fim do período um ano por passo, a
+  // partir do primeiro ano, até o último. Sem animação de transição para
+  // quem pede movimento reduzido (o CSS do mapa já respeita isso).
+  useEffect(() => {
+    if (!tocando) return;
+    const t = setTimeout(() => {
+      const proximo = fim + 1;
+      setPeriodos((atual) => ({ ...atual, [modo]: [atual[modo][0], proximo] }));
+      if (proximo >= limites[1]) setTocando(false);
+    }, PASSO_MS);
+    return () => clearTimeout(t);
+  }, [tocando, fim, modo, limites]);
+
+  function tocarOuPausar() {
+    if (tocando) return setTocando(false);
+    setPeriodos((atual) => ({ ...atual, [modo]: [limites[0], limites[0]] }));
+    setTocando(true);
+  }
+
+  async function compartilhar() {
+    const url = window.location.href;
+    // No celular, o menu de compartilhar do aparelho; no computador, copia o link.
+    if (window.matchMedia("(pointer: coarse)").matches && typeof navigator.share === "function") {
+      try {
+        await navigator.share({ title: document.title, url });
+      } catch {
+        // a pessoa fechou o menu: nada a fazer
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2500);
+    } catch {
+      window.prompt("Copie o link desta visão:", url);
+    }
+  }
+
+  const principal: Linha = { nome: p.nome, serie: naDose(p.principal, dose) };
+  const comparacoes = p.comparacoes.map((l) => ({ ...l, serie: naDose(l.serie, dose) }));
   const escolhida = selecionada !== null ? porId.get(selecionada) : undefined;
   const destaque: Linha | null = escolhida ? { nome: escolhida.nome, serie: escolhida } : null;
 
+  const lugar = p.lugares?.find((l) => l.href === p.lugarAtual)?.rotulo ?? p.nome;
+  const resumoFiltros = `${lugar} · ${modo === "vacinacao" ? `Vacinação, ${dose}ª dose` : "Casos"}`;
+
   return (
-    <div>
-      {/* Título e filtros */}
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <span className="etiqueta">{p.etiqueta}</span>
-          <h1 className="titulo mt-3 text-[2.25rem] sm:text-5xl">{p.titulo}</h1>
-        </div>
-        <div role="group" aria-label="Filtros" className="flex flex-wrap items-end gap-2.5">
+    // No computador: título e filtros lado a lado (grade de 2 colunas; o
+    // resto ocupa as duas). No celular: os filtros viram uma barra-resumo
+    // presa no topo, que abre os controles ao tocar. A barra precisa ser
+    // filha direta deste bloco para ficar presa durante todo o painel.
+    <div className="lg:grid lg:grid-cols-[1fr_auto] lg:items-end lg:gap-x-6 lg:[&>*:nth-child(n+3)]:col-span-2">
+      <div>
+        <h1 className="titulo text-[2rem] sm:text-[2.75rem]">{p.titulo}</h1>
+        <p className="linha-fina mt-2">
+          {modo === "vacinacao"
+            ? `${p.assunto}: vacina tríplice viral, ${dose}ª dose, crianças de 1 ano`
+            : `${p.assunto}: casos confirmados, pelo município onde a pessoa mora`}
+        </p>
+      </div>
+      <div className="sticky top-0 z-30 -mx-4 mt-4 border-b border-linha bg-fundo px-4 py-2 sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:mt-0 lg:max-w-[34rem] lg:justify-self-end lg:border-0 lg:bg-transparent lg:p-0">
+        <button
+          type="button"
+          aria-expanded={filtrosAbertos}
+          aria-controls={`${idMapa}-filtros`}
+          onClick={() => setFiltrosAbertos((a) => !a)}
+          className="flex w-full items-center gap-3 rounded-lg border border-linha bg-folha px-4 py-2.5 text-left lg:hidden"
+        >
+          <span className="min-w-0 flex-1">
+            <span className="rotulo block">Filtros · {`${inicio}–${fim}`}</span>
+            <span className="block leading-snug font-semibold">{resumoFiltros}</span>
+          </span>
+          <span className="flex shrink-0 items-center gap-1 text-sm font-semibold text-azul">
+            {filtrosAbertos ? "Fechar" : "Mudar"}
+            <Icone nome="chevron" className={`size-4 transition-transform ${filtrosAbertos ? "rotate-180" : ""}`} />
+          </span>
+        </button>
+        <div
+          id={`${idMapa}-filtros`}
+          role="group"
+          aria-label="Filtros"
+          className={`${filtrosAbertos ? "flex" : "hidden"} max-h-[70vh] flex-wrap items-end gap-2.5 overflow-y-auto pt-3 pb-1 lg:flex lg:max-h-none lg:overflow-visible lg:p-0`}
+        >
           <label className="flex flex-col gap-1">
             <span className="rotulo">De</span>
             <select className="seletor" value={inicio} onChange={(e) => mudarPeriodo([Number(e.target.value), Math.max(Number(e.target.value), fim)])}>
@@ -124,7 +264,8 @@ export function Painel(p: PropsPainel) {
           {p.lugares && (
             <label className="flex flex-col gap-1">
               <span className="rotulo">Lugar</span>
-              <select className="seletor max-w-[13rem]" value={p.lugarAtual} onChange={(e) => router.push(e.target.value)}>
+              {/* Leva junto os filtros escolhidos (período, casos, dose). */}
+              <select className="seletor max-w-[13rem]" value={p.lugarAtual} onChange={(e) => router.push(e.target.value + window.location.search)}>
                 {p.lugares.map((l) => (
                   <option key={l.href} value={l.href}>
                     {l.rotulo}
@@ -133,56 +274,68 @@ export function Painel(p: PropsPainel) {
               </select>
             </label>
           )}
-          <div className="flex flex-col gap-1">
-            <span className="rotulo">Mostrar</span>
-            <div className="flex rounded-xl bg-azul-claro p-1">
-              {(
-                [
-                  ["vacinacao", "Vacinação"],
-                  ["casos", "Casos"],
-                ] as const
-              ).map(([valor, rotulo]) => (
-                <button
-                  key={valor}
-                  type="button"
-                  aria-pressed={modo === valor}
-                  onClick={() => setModo(valor)}
-                  className={`min-h-9 rounded-[0.6rem] px-4 font-bold transition-colors ${modo === valor ? "bg-azul text-white" : "text-azul hover:bg-folha"}`}
-                >
-                  {rotulo}
-                </button>
-              ))}
-            </div>
-          </div>
+          <Alternador
+            rotulo="Mostrar"
+            valor={modo}
+            aoMudar={setModo}
+            opcoes={[
+              { valor: "vacinacao", texto: "Vacinação" },
+              { valor: "casos", texto: "Casos" },
+            ]}
+          />
+          {modo === "vacinacao" && (
+            <Alternador
+              rotulo="Dose"
+              valor={dose}
+              aoMudar={setDose}
+              opcoes={[
+                { valor: 1, texto: "1ª", descricao: "1ª dose" },
+                { valor: 2, texto: "2ª", descricao: "2ª dose" },
+              ]}
+            />
+          )}
+          <button type="button" onClick={compartilhar} className="botao botao-contorno min-h-11">
+            <Icone nome={copiado ? "ok" : "compartilhar"} className="size-[1.125rem]" />
+            {copiado ? "Link copiado" : "Compartilhar"}
+          </button>
+          <span className="sr-only" aria-live="polite">
+            {copiado ? "Link desta visão copiado." : ""}
+          </span>
+          <button type="button" onClick={() => setFiltrosAbertos(false)} className="botao botao-azul min-h-11 w-full lg:hidden">
+            Ver os números
+          </button>
         </div>
       </div>
 
-      <Numeros {...p} modo={modo} periodo={periodo} dados={dados} plural={plural} temRegioes={temRegioes} />
+      <Numeros
+        {...p}
+        principal={principal.serie}
+        comparacoes={comparacoes}
+        dose={dose}
+        modo={modo}
+        periodo={periodo}
+        dados={dados}
+        plural={plural}
+        temRegioes={temRegioes}
+      />
 
       {/* Mapa */}
       {temRegioes && (
         <section aria-labelledby={idMapa} className="cartao relative mt-4 overflow-hidden">
-          <div className="flex flex-wrap items-center justify-between gap-3 px-4 pt-4 sm:px-6 sm:pt-5">
-            <h2 id={idMapa} className="titulo text-2xl">
-              {modo === "vacinacao" ? `Vacinação por ${tipo} em ${fim}` : `Casos de sarampo por ${tipo} em ${fim}`}
-            </h2>
+          <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3 px-4 pt-4 sm:px-6 sm:pt-5">
+            <div>
+              <h2 id={idMapa} className="titulo text-[1.5rem]">
+                {modo === "casos" ? `Casos de sarampo por ${tipo} em ${fim}` : `${dose === 2 ? "2ª dose" : "Vacinação"} por ${tipo} em ${fim}`}
+              </h2>
+              {/* Como ler, numa frase (sem passos numerados). */}
+              <p className="mt-1 max-w-[62ch] text-[0.9375rem] text-tinta-2">
+                {modo === "vacinacao" ? `Cada ${tipo} tem a cor da sua situação em ${fim}.` : `Quanto mais escuro, mais casos em ${fim}.`} Toque {numUm} para
+                ver o número{tipo === "estado" ? " e abrir as cidades" : ""}; mude os anos na barra abaixo do mapa.
+              </p>
+            </div>
             <Legenda modo={modo} dados={dados} anos={p.anos} fim={fim} />
           </div>
           <div className="relative px-4 pt-3 sm:px-6">
-            <ol className="mb-3 grid gap-2 rounded-2xl bg-azul-claro p-3.5 text-sm font-medium sm:grid-cols-3 xl:absolute xl:top-3 xl:left-6 xl:z-0 xl:w-60 xl:grid-cols-1">
-              {[
-                modo === "vacinacao" ? `Cada ${tipo} tem a cor da sua situação em ${fim}.` : `Quanto mais escuro, mais casos em ${fim}.`,
-                `Toque ${numUm} para ver o número${tipo === "estado" ? " e abrir as cidades" : ""}.`,
-                "Mude os anos na barra abaixo do mapa.",
-              ].map((t, i) => (
-                <li key={t} className="flex gap-2">
-                  <span className="grid size-6 shrink-0 place-items-center rounded-full bg-azul text-xs font-bold text-white" aria-hidden="true">
-                    {i + 1}
-                  </span>
-                  {t}
-                </li>
-              ))}
-            </ol>
             <div className="mx-auto max-w-[620px]">
               {dados ? (
                 <MapaPainel
@@ -192,19 +345,34 @@ export function Painel(p: PropsPainel) {
                   anos={p.anos}
                   periodo={periodo}
                   tipo={tipo}
+                  dose={dose}
                   anoParcial={p.anoParcial}
                   aoSelecionar={setSelecionada}
                   resumo={resumoDoMapa(modo, dados, p.anos, fim, plural)}
                 />
               ) : (
-                <div className="grid aspect-square place-items-center rounded-2xl bg-grade text-tinta-3 motion-safe:animate-pulse">
+                <div className="grid aspect-square place-items-center rounded-lg bg-grade text-tinta-2 motion-safe:animate-pulse">
                   {erro ? "Não foi possível carregar o mapa. Recarregue a página." : "Carregando o mapa…"}
                 </div>
               )}
             </div>
           </div>
-          <div className="mt-2 border-t border-grade px-4 py-4 sm:px-6">
-            <BarraAnos limites={limites} valor={periodo} aoMudar={mudarPeriodo} />
+          <div className="mt-2 border-t border-linha px-4 py-4 sm:px-6">
+            <BarraAnos
+              limites={limites}
+              valor={periodo}
+              aoMudar={mudarPeriodo}
+              extra={
+                <button
+                  type="button"
+                  onClick={tocarOuPausar}
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-azul px-3 text-sm font-semibold whitespace-nowrap text-white transition-colors hover:bg-azul-escuro"
+                >
+                  <Icone nome={tocando ? "pausar" : "tocar"} className="size-4" />
+                  {tocando ? "Pausar" : "Ver os anos passando"}
+                </button>
+              }
+            />
           </div>
         </section>
       )}
@@ -212,44 +380,80 @@ export function Painel(p: PropsPainel) {
       {/* Ano a ano */}
       <section className="cartao mt-4 p-4 sm:p-6" aria-labelledby={`${idMapa}-evolucao`}>
         <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
-          <h2 id={`${idMapa}-evolucao`} className="titulo text-2xl">
-            Ano a ano
+          <h2 id={`${idMapa}-evolucao`} className="titulo text-[1.5rem]">
+            Vacinação e casos, ano a ano
           </h2>
           <p className="text-sm text-tinta-2">
-            {modo === "vacinacao"
-              ? temRegioes
-                ? `Toque ${numUm} no mapa para comparar com ${p.nome}.`
-                : "Passe o dedo ou o mouse sobre o gráfico para ver cada ano."
-              : "Passe o dedo ou o mouse sobre as barras para ver cada ano."}
+            Em cima, a vacinação; embaixo, os casos.{" "}
+            {temRegioes ? `Toque ${numUm} no mapa para comparar com ${p.nome}.` : "Passe o dedo ou o mouse para ver cada ano."}
           </p>
         </div>
         {!temRegioes && (
-          <div className="mt-4 border-b border-grade pb-4">
+          <div className="mt-4 border-b border-linha pb-4">
             <BarraAnos limites={limites} valor={periodo} aoMudar={mudarPeriodo} />
           </div>
         )}
         <div className="mt-4">
-          <Evolucao modo={modo} anos={p.anos} principal={principal} comparacoes={p.comparacoes} destaque={destaque} periodo={periodo} anoParcial={p.anoParcial} />
+          <Evolucao
+            anos={p.anos}
+            principal={principal}
+            comparacoes={comparacoes}
+            destaque={destaque}
+            periodo={periodo}
+            anoParcial={p.anoParcial}
+            rotuloDose={`${dose}ª dose`}
+          />
         </div>
-        <TabelaDosAnos modo={modo} anos={p.anos} linhas={[principal, ...p.comparacoes]} />
+        <TabelaDosAnos modo={modo} anos={p.anos} linhas={[principal, ...comparacoes]} />
       </section>
 
       {/* Tabela por estado ou cidade */}
       {temRegioes && (
         <section className="cartao mt-4 p-4 sm:p-6" aria-labelledby={`${idMapa}-tabela`}>
-          <h2 id={`${idMapa}-tabela`} className="titulo text-2xl">
+          <h2 id={`${idMapa}-tabela`} className="titulo text-[1.5rem]">
             {tipo === "estado" ? "Estado por estado" : "Cidade por cidade"}: {inicio} × {fim}
           </h2>
-          <p className="mt-1 mb-4 text-sm text-tinta-2">Em ordem alfabética. Toque no nome para abrir a página do lugar.</p>
+          <p className="mt-1 mb-4 text-[0.9375rem] text-tinta-2">
+            Em ordem alfabética{dados ? `, ${dados.regioes.length} ${plural}` : ""}. Role a tabela para ver todos e toque no nome para abrir a página do
+            lugar.
+          </p>
           {dados ? (
             <TabelaRegioes regioes={dados.regioes} modo={modo} anos={p.anos} periodo={periodo} coluna={tipo === "estado" ? "Estado" : "Cidade"} />
           ) : (
-            <div className="h-40 rounded-xl bg-grade motion-safe:animate-pulse" />
+            <div className="h-40 rounded-lg bg-grade motion-safe:animate-pulse" />
           )}
         </section>
       )}
 
       {p.children}
+    </div>
+  );
+}
+
+/** Botões lado a lado em que só um fica escolhido (ex.: Vacinação / Casos). */
+function Alternador<T extends string | number>({
+  rotulo,
+  valor,
+  aoMudar,
+  opcoes,
+}: {
+  rotulo: string;
+  valor: T;
+  aoMudar: (v: T) => void;
+  opcoes: { valor: T; texto: string; descricao?: string }[];
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="rotulo" aria-hidden="true">
+        {rotulo}
+      </span>
+      <div role="group" aria-label={rotulo} className="alternador">
+        {opcoes.map((o) => (
+          <button key={o.valor} type="button" aria-pressed={valor === o.valor} aria-label={o.descricao} onClick={() => aoMudar(o.valor)}>
+            {o.texto}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -272,10 +476,10 @@ function contar(dados: DadosRegioes, anos: Anos, ano: number) {
 function Legenda({ modo, dados, anos, fim }: { modo: Modo; dados: DadosRegioes | null; anos: Anos; fim: number }) {
   if (modo === "casos") {
     return (
-      <ul className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.8125rem] font-semibold text-tinta-2" aria-label="Legenda: casos confirmados no ano">
+      <ul className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[0.875rem] text-tinta-2" aria-label="Legenda: casos confirmados no ano">
         {FAIXAS_CASOS.map((f) => (
           <li key={f.rotulo} className="flex items-center gap-1.5">
-            <span className="size-3.5 rounded-[4px] border border-black/10" style={{ background: f.cor }} aria-hidden="true" />
+            <span className="size-3.5 rounded-[3px] border border-black/10" style={{ background: f.cor }} aria-hidden="true" />
             {f.rotulo}
           </li>
         ))}
@@ -283,20 +487,19 @@ function Legenda({ modo, dados, anos, fim }: { modo: Modo; dados: DadosRegioes |
     );
   }
   const c = dados ? contar(dados, anos, fim) : null;
-  const estilo: Record<Situacao, string> = {
-    critico: "border-critico text-critico-tinta bg-critico-fundo",
-    alerta: "border-alerta text-alerta-tinta bg-alerta-fundo",
-    ok: "border-ok text-ok-tinta bg-ok-fundo",
-    vazio: "border-vazio text-tinta-3 bg-grade",
-  };
+  const tinta: Record<Situacao, string> = { critico: "text-critico-tinta", alerta: "text-alerta-tinta", ok: "text-ok-tinta", vazio: "text-tinta-2" };
   const tipos: Situacao[] = c && c.vazio > 0 ? ["critico", "alerta", "ok", "vazio"] : ["critico", "alerta", "ok"];
+  // Amostra da cor do mapa + ícone + palavra + quantos lugares: sem pílulas.
   return (
-    <ul className="flex flex-wrap gap-2" aria-label="Legenda das situações">
+    <ul className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[0.875rem]" aria-label="Legenda das situações">
       {tipos.map((t) => (
-        <li key={t} className={`inline-flex items-center gap-1.5 rounded-full border-[1.5px] px-3 py-1 text-[0.8125rem] font-bold ${estilo[t]}`}>
-          {t !== "vazio" && <Icone nome={t} className="size-4" />}
-          {SITUACOES[t].nome}
-          {c && ` · ${c[t]}`}
+        <li key={t} className="inline-flex items-center gap-1.5">
+          <span className="size-3.5 rounded-[3px]" style={{ background: SITUACOES[t].cor }} aria-hidden="true" />
+          <span className={`inline-flex items-center gap-1 font-semibold ${tinta[t]}`}>
+            {t !== "vazio" && <Icone nome={t} className="size-4" />}
+            {SITUACOES[t].nome}
+          </span>
+          {c && <span className="text-tinta-2">{c[t]}</span>}
           <span className="sr-only">({SITUACOES[t].faixa})</span>
         </li>
       ))}
@@ -304,10 +507,11 @@ function Legenda({ modo, dados, anos, fim }: { modo: Modo; dados: DadosRegioes |
   );
 }
 
-function Cartao({ rotulo, children, className = "" }: { rotulo: string; children: React.ReactNode; className?: string }) {
+/** Uma célula da faixa de números (as linhas entre elas vêm da grade). */
+function Cartao({ rotulo, children }: { rotulo: string; children: React.ReactNode }) {
   return (
-    <article className={`flex flex-col gap-2 rounded-[1.25rem] border p-4 sm:p-5 ${className || "border-linha bg-folha"}`}>
-      <p className="text-sm font-semibold text-tinta-2">{rotulo}</p>
+    <article className="flex flex-col gap-2 bg-folha p-4 sm:p-5">
+      <p className="text-[0.9375rem] text-tinta-2">{rotulo}</p>
       {children}
     </article>
   );
@@ -323,11 +527,13 @@ function Numeros({
   plural,
   temRegioes,
   anoParcial,
-}: PropsPainel & { modo: Modo; periodo: [number, number]; dados: DadosRegioes | null; plural: string; temRegioes: boolean }) {
-  // No celular: o número principal e o quarto cartão na largura toda; os
-  // dois do meio lado a lado (menos rolagem).
+  dose,
+}: PropsPainel & { modo: Modo; dose: Dose; periodo: [number, number]; dados: DadosRegioes | null; plural: string; temRegioes: boolean }) {
+  // Uma faixa só, com linhas de 1 px entre as células (fundo da grade
+  // aparecendo). No celular: o número principal e o último na largura toda;
+  // os dois do meio lado a lado.
   const grade =
-    "mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4 [&>*:first-child]:col-span-2 [&>*:last-child]:col-span-2 lg:[&>*:first-child]:col-span-1 lg:[&>*:last-child]:col-span-1";
+    "mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-linha bg-linha lg:grid-cols-4 [&>*:first-child]:col-span-2 [&>*:last-child]:col-span-2 lg:[&>*:first-child]:col-span-1 lg:[&>*:last-child]:col-span-1";
   const parcial = (a: number) => (a === anoParcial ? " (parcial)" : "");
 
   if (modo === "vacinacao") {
@@ -339,7 +545,7 @@ function Numeros({
     const s = situacao(v);
     return (
       <div className={grade}>
-        <Cartao rotulo={`Crianças de 1 ano vacinadas em ${fim}`} className={TOM[s]}>
+        <Cartao rotulo={dose === 1 ? `Crianças de 1 ano vacinadas em ${fim}` : `Crianças de 1 ano com a 2ª dose em ${fim}`}>
           <p className="numero text-[2.75rem]">{v === null ? "sem dado" : porcentagem(v)}</p>
           <Selo tipo={s}>{s === "vazio" ? "Sem dado oficial" : `${SITUACOES[s].nome} · a meta é 95%`}</Selo>
         </Cartao>
@@ -356,9 +562,11 @@ function Numeros({
             </p>
           )}
           <p className="text-sm text-tinta-2">
-            {d === null || inicio === fim
+            {inicio === fim
               ? "Escolha um período com dois anos diferentes."
-              : praticamenteIgual(d)
+              : d === null
+                ? `Sem número oficial em ${v0 === null ? inicio : fim}.`
+                : praticamenteIgual(d)
                 ? `Em ${inicio} também eram ${porcentagem(v0!)}.`
                 : `pontos ${d < 0 ? "a menos" : "a mais"}. Em ${inicio} eram ${porcentagem(v0!)}.`}
           </p>
@@ -400,7 +608,7 @@ function Numeros({
   const comCasos = dados ? dados.regioes.filter((r) => (casosEm(r, anos, fim) ?? 0) > 0).length : null;
   return (
     <div className={grade}>
-      <Cartao rotulo={`Casos de sarampo em ${fim}${parcial(fim)}`} className="border-[#ffd2bd] bg-[#fff6f1]">
+      <Cartao rotulo={`Casos de sarampo em ${fim}${parcial(fim)}`}>
         <p className="numero text-[2.75rem] text-casos-tinta">{numero(c)}</p>
         <p className="text-sm text-tinta-2">pessoas com sarampo confirmado</p>
       </Cartao>
@@ -408,8 +616,10 @@ function Numeros({
         {inicio === fim ? (
           <p className="numero text-[2.75rem] text-tinta-3">—</p>
         ) : (
-          <p className={`numero flex items-center gap-1 text-[2.75rem] ${d > 0 ? "text-critico-tinta" : d < 0 ? "text-ok-tinta" : ""}`}>
-            {d !== 0 && <Icone nome={d > 0 ? "sobe" : "desce"} className="size-9" />}
+          // Neutro: verde e vermelho ficam só para a situação da cobertura.
+          <p className="numero flex items-center gap-1 text-[2.75rem]">
+            {d !== 0 && <Icone nome={d > 0 ? "sobe" : "desce"} className="size-9 text-tinta-2" />}
+            <span className="sr-only">{d > 0 ? "subiu" : d < 0 ? "caiu" : ""}</span>
             {numero(Math.abs(d))}
           </p>
         )}
@@ -481,7 +691,7 @@ function TabelaDosAnos({ modo, anos, linhas }: { modo: Modo; anos: Anos; linhas:
         <Icone nome="seta" className="size-4 transition-transform group-open:rotate-90" />
         Ver os números em tabela
       </summary>
-      <div className="mt-2 max-h-80 overflow-auto rounded-xl border border-linha">
+      <div className="mt-2 max-h-80 overflow-auto rounded-lg border border-linha">
         <table className="w-full border-collapse text-left text-[0.9375rem]">
           <caption className="sr-only">{modo === "vacinacao" ? "Cobertura vacinal por ano" : "Casos de sarampo por ano"}</caption>
           <thead className="sticky top-0 bg-grade">

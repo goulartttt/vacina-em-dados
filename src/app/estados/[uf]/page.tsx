@@ -43,7 +43,7 @@ async function Conteudo({ params }: Pick<PageProps<"/estados/[uf]">, "params">) 
     <>
       <TopoInterno voltar={{ href: "/", rotulo: "Voltar para o Brasil" }} itens={[{ href: "/", rotulo: "Brasil" }, { rotulo: t.nome }]} />
       <Painel
-        etiqueta="Sarampo · vacina tríplice viral, 1ª dose"
+        assunto="Sarampo"
         titulo={`Como está a vacinação contra o sarampo ${noLugar(t)}?`}
         nome={t.nome}
         anos={anos}
