@@ -6,7 +6,7 @@ import { useRef, useState } from "react";
 import { FAIXAS_CASOS, faixaCasos, situacao, SITUACOES } from "@/lib/constantes";
 import { numero, pontos, porcentagem } from "@/lib/formato";
 import { LARGURA_MAPA } from "@/lib/mapa-base";
-import { casosEm, coberturaEm, type Anos, type Malha, type Modo, type Regiao } from "@/lib/painel";
+import { casosEm, coberturaEm, praticamenteIgual, type Anos, type Malha, type Modo, type Regiao } from "@/lib/painel";
 
 import { Icone } from "../Icone";
 import { Selo } from "../Situacao";
@@ -157,12 +157,15 @@ function Detalhe({
           <span className="numero text-[2rem]">{v === null ? "sem dado" : porcentagem(v)}</span>{" "}
           <span className="text-sm text-tinta-2">das crianças de 1 ano vacinadas em {fim}</span>
         </p>
-        {diferenca !== null && (
-          <p className={`mt-1 flex items-center gap-1 text-sm font-semibold ${diferenca < 0 ? "text-critico-tinta" : "text-ok-tinta"}`}>
-            <Icone nome={diferenca < 0 ? "desce" : "sobe"} className="size-4" />
-            {Math.abs(diferenca) < 0.05 ? `igual a ${inicio}` : `${diferenca < 0 ? "caiu" : "subiu"} ${pontos(diferenca)} desde ${inicio}`}
-          </p>
-        )}
+        {diferenca !== null &&
+          (praticamenteIgual(diferenca) ? (
+            <p className="mt-1 text-sm font-semibold text-tinta-2">igual a {inicio}</p>
+          ) : (
+            <p className={`mt-1 flex items-center gap-1 text-sm font-semibold ${diferenca < 0 ? "text-critico-tinta" : "text-ok-tinta"}`}>
+              <Icone nome={diferenca < 0 ? "desce" : "sobe"} className="size-4" />
+              {`${diferenca < 0 ? "caiu" : "subiu"} ${pontos(diferenca)} desde ${inicio}`}
+            </p>
+          ))}
       </>
     );
   } else {

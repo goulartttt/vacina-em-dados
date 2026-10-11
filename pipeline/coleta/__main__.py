@@ -1,7 +1,7 @@
 """Rotinas de coleta. Uso (dentro de pipeline/):
 
     python -m coleta territorios   # IBGE: Brasil, estados e municípios
-    python -m coleta cobertura     # PNI 1994–2018
+    python -m coleta cobertura     # PNI: arquivos 1994–2016, TabNet 2017–2022, painel 2023+
     python -m coleta sarampo       # SINAN: casos de sarampo
     python -m coleta ubs           # CNES: unidades básicas de saúde ativas
     python -m coleta tudo
@@ -10,7 +10,7 @@
 import sys
 from datetime import date
 
-from . import banco, cobertura, sinan, territorios, ubs
+from . import banco, cobertura, painel, sinan, tabnet, territorios, ubs
 
 FTP = "ftp://ftp.datasus.gov.br"
 
@@ -35,15 +35,31 @@ def _contexto(conn):
 def carregar_cobertura(conn) -> None:
     mapa, ufs = _contexto(conn)
     vacinas = dict(banco.ler(conn, "select codigo_pni, id from public.vacinas"))
-    linhas, data = cobertura.coletar(vacinas, mapa, ufs)
+    # Baixa as três fontes antes de gravar: se uma falhar, nada muda no site.
+    arquivos, data = cobertura.coletar(vacinas, mapa, ufs)
+    recentes, atualizado = tabnet.coletar(vacinas, mapa, ufs)
+    do_painel, painel_atualizado = painel.coletar(vacinas, mapa, ufs, date.today().year)
+    linhas = arquivos + recentes + do_painel
     for vacina in vacinas.values():
         n = banco.substituir(conn, "cobertura_anual", cobertura.COLUNAS,
                              {"vacina_id": vacina, "origem": "oficial"},
                              (l for l in linhas if l[1] == vacina))
         print(f"cobertura {vacina}: {n} linhas")
-    banco.registrar_atualizacao(conn, "pni_cobertura_1994_2018",
-                                "Ministério da Saúde, SI-PNI: cobertura vacinal 1994–2018 (base do TabNet)",
+    primeiro, ultimo = cobertura.ANOS[0], cobertura.ANOS[-1]
+    banco.registrar_atualizacao(conn, "pni_cobertura_arquivos",
+                                f"Ministério da Saúde, SI-PNI: cobertura vacinal {primeiro}–{ultimo} (arquivos do DATASUS)",
                                 f"{FTP}{cobertura.PASTA}", data)
+    primeiro, ultimo = tabnet.ANOS[0], tabnet.ANOS[-1]
+    banco.registrar_atualizacao(conn, "pni_cobertura_tabnet",
+                                f"Ministério da Saúde, SI-PNI: cobertura vacinal {primeiro}–{ultimo} (TabNet"
+                                + (f", dados atualizados em {atualizado})" if atualizado else ")"),
+                                tabnet.URL, None)
+    anos_painel = sorted({l[2] for l in do_painel})
+    if anos_painel:
+        banco.registrar_atualizacao(conn, "pni_cobertura_painel",
+                                    f"Ministério da Saúde: cobertura vacinal {anos_painel[0]}–{anos_painel[-1]} "
+                                    "(painel do Calendário Nacional, por local de aplicação)",
+                                    painel.URL, painel_atualizado)
 
 
 def carregar_agravo(conn, agravo: sinan.Agravo) -> None:

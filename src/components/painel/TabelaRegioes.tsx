@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 
 import { situacao } from "@/lib/constantes";
 import { normalizar, numero, pontos, porcentagem } from "@/lib/formato";
-import { casosEm, casosNoPeriodo, coberturaEm, type Anos, type Modo, type Regiao } from "@/lib/painel";
+import { casosEm, casosNoPeriodo, coberturaEm, praticamenteIgual, type Anos, type Modo, type Regiao } from "@/lib/painel";
 
 import { Icone } from "../Icone";
 import { Selo } from "../Situacao";
@@ -98,9 +98,11 @@ export function TabelaRegioes({
                   {nome}
                   <td className={celula}>{v0 === null ? "—" : porcentagem(v0)}</td>
                   <td className={`${celula} font-bold`}>{v === null ? "—" : porcentagem(v)}</td>
-                  <td className={`${celula} ${d === null ? "" : d < 0 ? "text-critico-tinta" : "text-ok-tinta"}`}>
+                  <td className={`${celula} ${d === null || praticamenteIgual(d) ? "" : d < 0 ? "text-critico-tinta" : "text-ok-tinta"}`}>
                     {d === null || inicio === fim ? (
                       "—"
+                    ) : praticamenteIgual(d) ? (
+                      "igual"
                     ) : (
                       <span className="inline-flex items-center gap-1">
                         <Icone nome={d < 0 ? "desce" : "sobe"} className="size-3.5" />

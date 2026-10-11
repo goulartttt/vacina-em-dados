@@ -5,6 +5,7 @@ import type { Feature, FeatureCollection, Geometry, Position } from "geojson";
 import { cacheLife, cacheTag } from "next/cache";
 
 import { LARGURA_MAPA, type Forma } from "./mapa-base";
+import { buscar } from "./rede";
 
 // Contornos oficiais do IBGE (qualidade mínima, já simplificados), desenhados
 // em SVG no servidor: o navegador recebe só os caminhos prontos.
@@ -15,7 +16,7 @@ async function baixar(caminho: string): Promise<FeatureCollection> {
   "use cache";
   cacheLife("max");
   cacheTag("malhas");
-  const resposta = await fetch(`${API}/${caminho}&qualidade=minima&formato=application/vnd.geo%2Bjson`);
+  const resposta = await buscar(`${API}/${caminho}&qualidade=minima&formato=application/vnd.geo%2Bjson`);
   if (!resposta.ok) throw new Error(`Falha ao baixar malha do IBGE: HTTP ${resposta.status}`);
   return (await resposta.json()) as FeatureCollection;
 }
