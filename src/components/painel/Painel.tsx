@@ -691,7 +691,7 @@ function TabelaDosAnos({ modo, anos, linhas }: { modo: Modo; anos: Anos; linhas:
         <Icone nome="seta" className="size-4 transition-transform group-open:rotate-90" />
         Ver os números em tabela
       </summary>
-      <div className="mt-2 max-h-80 overflow-auto rounded-lg border border-linha">
+      <div className="relative mt-2 max-h-80 overflow-auto rounded-lg border border-linha">
         <table className="w-full border-collapse text-left text-[0.9375rem]">
           <caption className="sr-only">{modo === "vacinacao" ? "Cobertura vacinal por ano" : "Casos de sarampo por ano"}</caption>
           <thead className="sticky top-0 bg-grade">
