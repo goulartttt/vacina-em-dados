@@ -48,8 +48,10 @@ export function TabelaRegioes({
         </label>
       )}
       {/* Altura fixa com rolagem própria: a página não fica enorme e quem
-          quiser ver todos rola dentro da tabela (o cabeçalho fica parado). */}
-      <div tabIndex={0} aria-label="Tabela com rolagem" className="max-h-[25rem] overflow-auto rounded-lg border border-linha">
+          quiser ver todos rola dentro da tabela (o cabeçalho fica parado).
+          "relative" segura dentro da caixa os textos só para leitor de tela
+          (sr-only), que de outro modo alargavam a página no celular. */}
+      <div tabIndex={0} aria-label="Tabela com rolagem" className="relative max-h-[25rem] overflow-auto rounded-lg border border-linha">
         <table className="w-full min-w-[34rem] border-collapse text-left text-[0.9375rem]">
           <caption className="sr-only">
             {modo === "vacinacao" ? `Cobertura vacinal em ${inicio} e ${fim}` : `Casos de sarampo em ${inicio} e ${fim}`}, por {coluna.toLowerCase()}

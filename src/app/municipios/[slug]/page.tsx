@@ -37,7 +37,8 @@ export async function generateMetadata({ params }: PageProps<"/municipios/[slug]
   const nome = nomeCompleto(t);
   return {
     title: `${nome}: vacinação contra o sarampo e onde se vacinar`,
-    description: `Cobertura da vacina tríplice viral em ${nome}, ano a ano, comparada com a meta de 95%, o estado e o Brasil; casos de sarampo; e as UBS da cidade com endereço e telefone. Dados oficiais do Ministério da Saúde.`,
+    // Até ~160 caracteres: o Google corta o resto.
+    description: `Vacinação contra o sarampo em ${nome} ano a ano, comparada com a meta de 95%, o estado e o Brasil, os casos e as UBS com endereço e telefone.`,
   };
 }
 

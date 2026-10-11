@@ -103,7 +103,7 @@ export default async function SobreOsDados() {
         <h2 id="fontes" className="titulo text-[1.75rem]">
           Fontes e atualização
         </h2>
-        <div className="mt-5 overflow-x-auto rounded-xl border border-linha bg-folha">
+        <div className="relative mt-5 overflow-x-auto rounded-xl border border-linha bg-folha">
           <table className="w-full min-w-[40rem] border-collapse text-left text-[0.9375rem]">
             <caption className="sr-only">Fontes de dados, data do arquivo na fonte e data da última coleta</caption>
             <thead className="bg-grade">
