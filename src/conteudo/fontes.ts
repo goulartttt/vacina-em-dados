@@ -72,6 +72,18 @@ export const FONTES = {
     orgao: "Ministério da Saúde, DATASUS",
     url: "https://datasus.saude.gov.br/transferencia-de-arquivos/",
   },
+  tabnetExantematicas: {
+    id: "tabnetExantematicas",
+    titulo: "TabNet: doenças exantemáticas (sarampo e rubéola), SINAN",
+    orgao: "Ministério da Saúde, DATASUS",
+    url: "https://tabnet.datasus.gov.br/cgi/deftohtm.exe?sinannet/cnv/exantbr.def",
+  },
+  notaSinanSarampo: {
+    id: "notaSinanSarampo",
+    titulo: "Nota Técnica Conjunta nº 34/2026: revisão do banco de doenças exantemáticas no SINAN",
+    orgao: "Ministério da Saúde",
+    url: "https://www.gov.br/saude/pt-br/composicao/svsa/pni/notas-tecnicas/2026/nota-tecnica-conjunta-no-34-2026-cgvdi-dpni-svsa-ms",
+  },
   cnes: {
     id: "cnes",
     titulo: "Unidades básicas de saúde e cadastro de estabelecimentos (CNES)",
