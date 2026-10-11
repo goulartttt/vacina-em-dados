@@ -98,10 +98,14 @@ function Desenho({ modo, anos, principal, comparacoes, destaque, periodo, anoPar
   const baseY = altura - margem.base;
   const [inicio, fim] = periodo;
 
-  const marcasX = lista.filter((a) => {
-    const salto = estreito ? (lista.length > 12 ? 4 : 2) : lista.length > 20 ? 4 : 2;
-    return (a - lista[0]) % salto === 0 || a === lista[lista.length - 1];
-  });
+  // Um ano a cada "salto", mais o último. O rótulo regular perto demais do
+  // último sai, para os dois não se sobreporem (ex.: 2020 e 2022 no celular).
+  const salto = estreito ? (lista.length > 12 ? 4 : 2) : lista.length > 20 ? 4 : 2;
+  const ultimoAno = lista[lista.length - 1];
+  const LARGURA_ROTULO = 40; // "2022" no tamanho do eixo, com folga
+  const marcasX = lista.filter(
+    (a) => a === ultimoAno || ((a - lista[0]) % salto === 0 && x(ultimoAno) - x(a) >= LARGURA_ROTULO),
+  );
 
   const dicaTexto = (a: number) => {
     if (modo === "vacinacao") {

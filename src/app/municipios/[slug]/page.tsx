@@ -60,7 +60,9 @@ async function Conteudo({ params }: Pick<PageProps<"/municipios/[slug]">, "param
   const nome = nomeCompleto(t);
   const ultimo = [...pontos].reverse().find((p) => p.cobertura !== null);
   const acimaDe100 = pontos.filter((p) => (p.cobertura ?? 0) > 100).map((p) => p.ano);
-  const pequena = ultimo?.populacao != null && ultimo.populacao < POPULACAO_PEQUENA;
+  // De 2017 em diante a fonte não traz a população-alvo: vale a última conhecida.
+  const comPopulacao = [...pontos].reverse().find((p) => p.populacao !== null);
+  const pequena = comPopulacao?.populacao != null && comPopulacao.populacao < POPULACAO_PEQUENA;
   const cnes = fontes.find((f) => f.fonte === "cnes_ubs");
 
   return (
@@ -93,8 +95,8 @@ async function Conteudo({ params }: Pick<PageProps<"/municipios/[slug]">, "param
             )}
             {pequena && (
               <Nota titulo="Cidade pequena">
-                Com {numero(ultimo?.populacao ?? 0)} crianças na idade, poucas doses a mais ou a menos mudam bastante a porcentagem. Olhe a
-                tendência de vários anos, não um ano isolado.
+                Com cerca de {numero(comPopulacao?.populacao ?? 0)} crianças na idade (estimativa oficial de {comPopulacao?.ano}), poucas
+                doses a mais ou a menos mudam bastante a porcentagem. Olhe a tendência de vários anos, não um ano isolado.
               </Nota>
             )}
           </section>

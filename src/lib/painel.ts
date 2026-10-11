@@ -22,6 +22,10 @@ export function casosEm(s: Serie, anos: Anos, ano: number): number | null {
   return s.cas[ano - anos.casos[0]] ?? 0;
 }
 
+/** Diferença que, com uma casa decimal, vira 0,0 ponto: conta como "igual"
+ *  (não faz sentido mostrar seta e cor de queda para 93,12% → 93,10%). */
+export const praticamenteIgual = (diferenca: number) => Math.abs(diferenca) < 0.05;
+
 export function casosNoPeriodo(s: Serie, anos: Anos, [inicio, fim]: [number, number]): number {
   let total = 0;
   for (let a = inicio; a <= fim; a++) total += casosEm(s, anos, a) ?? 0;

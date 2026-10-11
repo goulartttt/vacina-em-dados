@@ -83,7 +83,8 @@ cobertura vacinal ao lado dos casos.
   `d3-array`; mapa com `d3-geo` e `topojson-client` (aprovados). Só a
   interação (dicas, troca de estado) roda no navegador.
 - **Leitura do banco:** `fetch` na API REST do Supabase com funções tipadas,
-  sem `@supabase/supabase-js`.
+  sem `@supabase/supabase-js`. Chamadas externas do servidor (Supabase,
+  IBGE) passam por `src/lib/rede.ts` (3 tentativas).
 - **Revisão dos textos de saúde:** só o Alexandre (não há profissional de
   saúde disponível). Por isso, toda frase de saúde precisa de fonte oficial
   ligada a ela, e o aviso "não substitui orientação médica" é obrigatório.
@@ -213,9 +214,10 @@ entre 4 opções numa página de escolha.
 
 | Dado | Fonte |
 |---|---|
-| Cobertura vacinal 1994–2018 | FTP DATASUS `dissemin/publicos/PNI/DADOS` (CPNI*.DBF). O arquivo de 2019 parou em 20/05/2019: **incompleto, não usar**. Layout muda entre anos (antigos: MUNIC 7 dígitos, FX_ETARIA, DOSE; recentes: MUNIC 6 dígitos). Códigos em `PNI/AUXILIARES/COBIMUNO.CNV` (tríplice viral D1 = 021, D2 = 098) |
-| Cobertura oficial 2019–2022 | A localizar (TabNet ou painel do Ministério em infoms.saude.gov.br) |
-| Doses 2020+ | Portal de Dados Abertos do SUS (`dadosabertos.saude.gov.br`, tag DPNI): arquivos mensais, uma linha por dose |
+| Cobertura vacinal 1994–2016 | FTP DATASUS `dissemin/publicos/PNI/DADOS` (CPNI*.DBF). Os arquivos de 2017 e 2018 divergem do TabNet (Brasil 2017: 90,85% × 86,24%) e o de 2019 parou em 20/05/2019: **não usar de 2017 em diante**. Layout muda entre anos (antigos: MUNIC 7 dígitos, FX_ETARIA, DOSE; recentes: MUNIC 6 dígitos). Códigos em `PNI/AUXILIARES/COBIMUNO.CNV` (tríplice viral D1 = 021, D2 = 098) |
+| Cobertura oficial 2017–2022 | TabNet `https://tabnet.datasus.gov.br/cgi/dhdat.exe?bd_pni/cpnibr.def` (base vai de 1994 a 2022, última atualização maio/2023). Só a porcentagem (sem doses e população). A consulta reenvia as opções do formulário exatamente como vêm na página (elas contêm trechos de SQL do próprio TabNet; nunca montar nem alterar). Conexão oscila: a rotina tenta 5 vezes. Até 2016 bate com o FTP município a município (conferido em 10/10/2026) |
+| Cobertura 2023+ | Painel do Ministério (Qlik) `infoms.saude.gov.br/extensions/SEIDIGI_DEMAS_VACINACAO_CALENDARIO_NACIONAL_COBERTURA_OCORRENCIA/...html`, app de produção `4a519ad7-08e6-470d-8a63-5aec742d616c`. Campos: `Ano`, `Cód. UF`, `Cód. Município` (6 dígitos), `Referência Imunobiológico` (`TRIPLICE_D1`/`TRIPLICE_D2`), `Total_Vacina` (doses), `[Qtd. População]`. Cobertura = soma das doses ÷ soma da população. O servidor recusa WebSocket fora do navegador (403): **não contornar**; `pipeline/coleta/painel.mjs` abre a página num Chrome sem janela (`--remote-debugging-pipe`, sem porta) e lê pelo Qlik da página (~25 s). Existe também a versão por residência (mesmo total do Brasil, cidades diferentes) |
+| Doses 2020+ | Portal de Dados Abertos do SUS (`dadosabertos.saude.gov.br`, tag DPNI; arquivos em `s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/PNI/csv/vacinacao_<mes>_<ano>_csv.zip`): uma linha por dose, com idade, vacina (`co_vacina` 24 = tríplice viral), dose e município de residência. Muito grande: 1–7 GB por mês compactado (~100 GB de 2023 a 2026); aqui baixou a 0,4 MB/s |
 | População-alvo da cobertura (crianças < 1 e 1 ano) | SINASC, nascidos vivos (FTP DATASUS) |
 | Coqueluche, sarampo/rubéola, meningite, difteria, tétano, PFA (pólio) | FTP DATASUS `SINAN/DADOS/{FINAIS,PRELIM}` (COQU, EXAN, MENI, DIFT, TETA, PFAN) |
 | Dengue | InfoDengue API (`info.dengue.mat.br/api/alertcity`) |
@@ -229,7 +231,20 @@ A documentação da API de Dados Abertos fica em
 
 ## Regras dos dados (decididas em 2026-10-09)
 
-- **Cobertura 1994–2018:** município = número oficial do arquivo `CPNIBR`.
+- **Cobertura 2023+:** painel por **ocorrência** (local de aplicação), a
+  mesma base de 1994–2022; o por residência mudaria o critério das cidades
+  no meio da série. O Ministério põe o 2022 do TabNet e o 2023 do painel
+  lado a lado (`/content/Default/Tabela_comparativa_CV_2022_2023.pdf`).
+  Só anos fechados: no ano em andamento o painel usa população
+  proporcional aos meses. Estados e municípios precisam somar exatamente o
+  total do Brasil, senão a coleta para. Os números são revisados com
+  registros atrasados (2023 D1: 85,6% em dez/2023, 89,89% em out/2026).
+- **Cobertura 2017–2022:** município, estado e Brasil prontos do TabNet
+  (estado = soma dos municípios, como já fazíamos de 2011 em diante).
+  Cobertura 0 no TabNet vira "sem dado" (a fonte usa 0 também quando falta
+  a população-alvo). Para o aviso de cidade pequena, vale a última
+  população-alvo conhecida (2016).
+- **Cobertura 1994–2016:** município = número oficial do arquivo `CPNIBR`.
   Estado até 2010 = arquivo oficial `CPNIUF` (população própria, diferente da
   soma dos municípios); de 2011 em diante = soma dos municípios (o TabNet faz
   igual). Brasil = soma dos estados.
@@ -243,8 +258,9 @@ A documentação da API de Dados Abertos fica em
   de residência; confirmado pela classificação final (sarampo = `CLASSI_FIN`
   1); óbito = `EVOLUCAO` 2. Brasil e estados têm linha mesmo com zero casos;
   município sem linha = zero casos.
-- **A conferir antes de publicar:** cobertura 2017–2018 contra o TabNet
-  online e óbitos por sarampo (SINAN dá 21 em 2019; o Ministério divulgou 15).
+- **A conferir antes de publicar:** óbitos por sarampo (SINAN dá 21 em 2019;
+  o Ministério divulgou 15). A cobertura 2017–2018 foi conferida em 10/10:
+  os arquivos divergiam e foram trocados pelo TabNet.
 
 ## Comandos
 
@@ -295,12 +311,15 @@ Vale para banco, API, rotinas e front. Não só o básico.
   identidade do Supabase) e fica no Git. Vale até **abril de 2031**; trocar
   antes disso. "Enforce SSL" está ligado no Supabase.
 
-## Onde paramos (09/10/2026, fim da sessão)
+## Onde paramos (10/10/2026)
 
 - Rodada 4 (novo visual "Painel vivo", mitos, calendário, UBS) commitada
   e enviada em 10/10 (`906cce9`, branch `feature/v1-reconstrucao`) e levada
-  para a `HML-V1.0` (nascida da `main`). Ainda não está na Vercel: o
-  Alexandre só publica quando estiver nos ajustes finais. Roda com
+  para a `HML-V1.0` e a `PROD-V1.0` (as duas nascidas da `main`, a pedido
+  do Alexandre, antes dos ajustes finais). Nenhuma está na Vercel ainda: ele
+  só publica quando o projeto estiver nos ajustes finais. Próximas demandas
+  nascem da `PROD-V1.0` (`feature/PROD-V1.0/<assunto>` → `HML-V1.1` →
+  `PROD-V1.1`). Roda com
   `npx next dev --port 3001` (no PowerShell, `npm run dev -- --port` perde o `--`).
 - Banco: tabela `ubs` criada (migração `20261009150000_ubs.sql`) e
   preenchida; Security Advisor limpo; escrita com a chave pública recusada.
@@ -311,7 +330,15 @@ Vale para banco, API, rotinas e front. Não só o básico.
   celular). Endereço inexistente responde 200 com `noindex` (comportamento
   documentado do Next com streaming; `dynamicParams` não existe com Cache
   Components).
-- Falta o Alexandre validar no navegador. Próximas etapas de dados:
-  cobertura 2019+ (para o "de 2018 até hoje"), conferir 2017–2018 e óbitos no
-  TabNet, distritos da capital de SP, outras 6 doenças. Depois: commit,
-  `HML-V1.0`, projeto HML na Vercel.
+- 10/10, demanda `feature/PROD-V1.0/cobertura-2019`: cobertura oficial
+  2017–2022 pelo TabNet (`pipeline/coleta/tabnet.py`), no lugar dos
+  arquivos de 2017–2018. Migração `20261010120000_cobertura_tabnet.sql`
+  (doses opcional + apaga a fonte antiga em `atualizacoes`): o MCP recusou
+  (tem "drop"/"delete"), então o Alexandre roda no SQL Editor do Supabase.
+  Rodada e conferida (Security Advisor limpo, escrita anônima recusada).
+- Na mesma demanda: cobertura 2023–2025 pelo painel do Ministério
+  (`painel.py` + `painel.mjs`). Série completa 1994–2025. Falta ver a
+  primeira coleta no GitHub Actions (o Chrome do Ubuntu 24.04 precisa
+  abrir sem `--no-sandbox`; se falhar, investigar antes de mudar).
+- Próximas etapas de dados: óbitos no TabNet, "Quais vacinas eu preciso?",
+  distritos da capital de SP, outras 6 doenças.

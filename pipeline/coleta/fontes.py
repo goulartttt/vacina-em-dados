@@ -58,20 +58,26 @@ def _data_ftp(ftp: ftplib.FTP, nome: str) -> datetime | None:
         return None
 
 
-def json_https(url: str, tentativas: int = 3) -> object:
-    """Baixa e lê um JSON. Falhas de rede passageiras ganham novas tentativas,
-    com espera crescente (as APIs do governo oscilam)."""
+def https(url: str, formulario: bytes | None = None, tentativas: int = 3) -> bytes:
+    """Baixa (GET) ou envia um formulário (POST). Falhas de rede passageiras
+    ganham novas tentativas, com espera crescente (os sites do governo oscilam)."""
     if not url.startswith("https://"):
         raise ValueError("só aceitamos fontes via HTTPS")
+    cabecalhos = {"Content-Type": "application/x-www-form-urlencoded"} if formulario is not None else {}
+    pedido = urllib.request.Request(url, data=formulario, headers=cabecalhos)
     for tentativa in range(1, tentativas + 1):
         try:
-            with urllib.request.urlopen(url, timeout=TIMEOUT) as resposta:
-                corpo = resposta.read()
-            break
+            with urllib.request.urlopen(pedido, timeout=TIMEOUT) as resposta:
+                return resposta.read()
         except (urllib.error.URLError, TimeoutError, ConnectionError):
             if tentativa == tentativas:
                 raise
             time.sleep(5 * tentativa)
+    raise AssertionError("inalcançável")
+
+
+def json_https(url: str) -> object:
+    corpo = https(url)
     if corpo[:2] == b"\x1f\x8b":  # o IBGE responde em gzip mesmo sem pedirmos
         corpo = gzip.decompress(corpo)
     return json.loads(corpo)

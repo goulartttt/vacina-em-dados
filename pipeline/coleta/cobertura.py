@@ -1,9 +1,14 @@
-"""Cobertura vacinal oficial 1994–2018 (FTP do DATASUS, base do TabNet/PNI).
+"""Cobertura vacinal oficial 1994–2016 (FTP do DATASUS, base do TabNet/PNI).
 
 - CPNIBRaa.DBF: todos os municípios do Brasil num arquivo por ano.
 - CPNIUFaa.DBF (até 2010): totais oficiais por estado, com população própria.
   De 2011 em diante o TabNet calcula o estado somando os municípios; fazemos igual.
-- 2019 fica de fora: o arquivo parou em 20/05/2019 e está incompleto.
+- De 2017 em diante vale o TabNet (tabnet.py). Os arquivos de 2017 e 2018
+  divergem do número oficial, provavelmente por serem anteriores aos
+  registros atrasados (ex.: Brasil 2017, 90,85% no arquivo e 86,24% no
+  TabNet); o de
+  2019 parou em 20/05/2019. Até 2016, arquivo e TabNet batem município a
+  município (conferido em 10/10/2026).
 
 Regras de qualidade:
 - Regiões administrativas do DF (códigos 537xxxx) somam em Brasília, que é
@@ -22,7 +27,7 @@ from .dbf import ler_dbf
 from .fontes import ftp_datasus
 
 PASTA = "/dissemin/publicos/PNI/DADOS"
-ANOS = range(1994, 2019)
+ANOS = range(1994, 2017)
 ULTIMO_ANO_COM_ARQUIVO_UF = 2010
 BRASIL = 1
 BRASILIA = 5300108
