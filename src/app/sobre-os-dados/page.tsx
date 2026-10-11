@@ -33,6 +33,18 @@ const METODO = [
     fonte: FONTES.datasusPni,
   },
   {
+    titulo: "De 2017 a 2022",
+    texto:
+      "Município, estado e Brasil vêm prontos do TabNet do Ministério da Saúde, atualizado pela última vez em maio de 2023. Os arquivos públicos de 2017 e 2018 divergem dele (em 2017, 90,85% no arquivo contra 86,24% no TabNet), por isso não são usados. A base é revisada com registros que chegam atrasados, por isso reportagens da época podem citar valores diferentes.",
+    fonte: FONTES.tabnetCobertura,
+  },
+  {
+    titulo: "De 2023 em diante",
+    texto:
+      "Vem do painel de cobertura vacinal do Ministério da Saúde, na versão por local de aplicação, a mesma base dos anos anteriores. O próprio Ministério põe o 2022 do TabNet e o 2023 do painel lado a lado, numa tabela comparativa publicada com os painéis. O painel também traz as doses e a população-alvo. O ano em andamento fica de fora até fechar: nele, o painel usa a população proporcional aos meses e os registros ainda estão chegando.",
+    fonte: FONTES.painelCobertura,
+  },
+  {
     titulo: "Casos de sarampo",
     texto:
       "Casos com classificação final de sarampo nas notificações de doenças exantemáticas do SINAN, contados pelo município onde a pessoa mora e pelo ano dos primeiros sintomas. Município sem registro no ano tem zero casos confirmados. No mapa, as cores mostram o número de casos no ano (não é taxa por habitante).",
@@ -47,8 +59,8 @@ const METODO = [
 ];
 
 const LIMITES = [
-  "A cobertura oficial vai até 2018. O arquivo público de 2019 parou em maio daquele ano e está incompleto, por isso não é usado. Os anos seguintes entram no site depois de conferidos com o painel oficial.",
-  "Quando mais de 5% das doses de um total vêm de lugares sem população-alvo informada (comum no ano de implantação de uma vacina), a cobertura fica em branco: dividir por uma população incompleta daria números falsos. As doses continuam registradas.",
+  "O Ministério também publica a cobertura por local de moradia. O total do Brasil é o mesmo; nas cidades, os números mudam. Aqui fica a versão por local de aplicação, para a série não mudar de critério no meio.",
+  "De 2017 a 2022, o TabNet publica só a porcentagem, sem as doses e a população-alvo. Quando ele mostra 0%, o site mostra “sem dado”: a fonte usa 0 tanto para nenhuma dose registrada quanto para população-alvo ausente, e não dá para separar os dois casos.",  "Quando mais de 5% das doses de um total vêm de lugares sem população-alvo informada (comum no ano de implantação de uma vacina), a cobertura fica em branco: dividir por uma população incompleta daria números falsos. As doses continuam registradas.",
   "Até 2010, o Distrito Federal aparece nos arquivos dividido em regiões administrativas. Aqui elas são somadas em Brasília, que é o único município do DF para o IBGE.",
   "A cobertura conta onde a vacina foi aplicada. Por isso uma cidade que vacina crianças de cidades vizinhas pode passar de 100%. O número é mostrado como foi publicado, com a explicação ao lado.",
   "Em municípios pequenos, poucas doses mudam muito a porcentagem. A página da cidade avisa quando a população-alvo é pequena.",

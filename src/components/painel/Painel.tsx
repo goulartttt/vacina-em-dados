@@ -5,7 +5,17 @@ import { useEffect, useId, useMemo, useState } from "react";
 
 import { FAIXAS_CASOS, situacao, SITUACOES, type Situacao } from "@/lib/constantes";
 import { decimal, numero, porcentagem } from "@/lib/formato";
-import { casosEm, casosNoPeriodo, coberturaEm, listaAnos, type Anos, type DadosRegioes, type Modo, type Serie } from "@/lib/painel";
+import {
+  casosEm,
+  casosNoPeriodo,
+  coberturaEm,
+  listaAnos,
+  praticamenteIgual,
+  type Anos,
+  type DadosRegioes,
+  type Modo,
+  type Serie,
+} from "@/lib/painel";
 
 import { Icone } from "../Icone";
 import { Selo } from "../Situacao";
@@ -336,6 +346,8 @@ function Numeros({
         <Cartao rotulo={inicio === fim ? "Variação" : `Desde ${inicio}`}>
           {d === null || inicio === fim ? (
             <p className="numero text-[2.75rem] text-tinta-3">—</p>
+          ) : praticamenteIgual(d) ? (
+            <p className="numero text-[2.75rem] text-tinta-2">igual</p>
           ) : (
             <p className={`numero flex items-center gap-1 text-[2.75rem] ${d < 0 ? "text-critico-tinta" : "text-ok-tinta"}`}>
               <Icone nome={d < 0 ? "desce" : "sobe"} className="size-9" />
@@ -344,7 +356,11 @@ function Numeros({
             </p>
           )}
           <p className="text-sm text-tinta-2">
-            {d === null || inicio === fim ? "Escolha um período com dois anos diferentes." : `pontos ${d < 0 ? "a menos" : "a mais"}. Em ${inicio} eram ${porcentagem(v0!)}.`}
+            {d === null || inicio === fim
+              ? "Escolha um período com dois anos diferentes."
+              : praticamenteIgual(d)
+                ? `Em ${inicio} também eram ${porcentagem(v0!)}.`
+                : `pontos ${d < 0 ? "a menos" : "a mais"}. Em ${inicio} eram ${porcentagem(v0!)}.`}
           </p>
         </Cartao>
         <Cartao rotulo={`Casos de sarampo em ${fim}`}>

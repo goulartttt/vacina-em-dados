@@ -17,7 +17,7 @@ export type Territorio = {
 
 export type PontoCobertura = {
   ano: number;
-  doses: number;
+  doses: number | null; // o TabNet (2017–2022) publica só a cobertura
   populacao: number | null;
   cobertura: number | null;
 };
@@ -34,6 +34,7 @@ export type Atualizacao = {
 };
 
 import { BRASIL, DOENCA_SARAMPO, META_COBERTURA, VACINA_SARAMPO } from "./constantes";
+import { buscar } from "./rede";
 
 export { BRASIL, DOENCA_SARAMPO, META_COBERTURA, VACINA_SARAMPO };
 
@@ -46,24 +47,6 @@ function config() {
     throw new Error("Configure SUPABASE_URL e SUPABASE_PUBLISHABLE_KEY (veja .env.example).");
   }
   return { url, chave };
-}
-
-const TENTATIVAS = 3;
-const espera = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-// Falhas passageiras (rede caiu, DNS não respondeu, banco ocupado com 5xx)
-// ganham novas tentativas com espera crescente, em vez de derrubar a página.
-// Erro 4xx é problema de consulta: falha na hora, sem insistir.
-async function buscar(endereco: string, headers: Record<string, string>): Promise<Response> {
-  for (let tentativa = 1; ; tentativa++) {
-    try {
-      const resposta = await fetch(endereco, { headers, signal: AbortSignal.timeout(20_000) });
-      if (resposta.status < 500 || tentativa === TENTATIVAS) return resposta;
-    } catch (erro) {
-      if (tentativa === TENTATIVAS) throw erro;
-    }
-    await espera(500 * 2 ** (tentativa - 1));
-  }
 }
 
 async function consultar<T>(tabela: string, filtros: Record<string, string>): Promise<T[]> {

@@ -1,5 +1,5 @@
 // Fontes oficiais citadas no site. Todo texto de saúde aponta para uma delas.
-// Conferidas em 9 de outubro de 2026.
+// Conferidas em 9 e 10 de outubro de 2026.
 
 export type Fonte = { id: string; titulo: string; orgao: string; url: string };
 
@@ -50,9 +50,21 @@ export const FONTES = {
   // o link aponta para a página oficial de transferência de arquivos.
   datasusPni: {
     id: "datasusPni",
-    titulo: "Cobertura vacinal 1994–2019 (arquivos do SI-PNI)",
+    titulo: "Cobertura vacinal 1994–2016 (arquivos do SI-PNI)",
     orgao: "Ministério da Saúde, DATASUS",
     url: "https://datasus.saude.gov.br/transferencia-de-arquivos/",
+  },
+  tabnetCobertura: {
+    id: "tabnetCobertura",
+    titulo: "TabNet: Imunizações, cobertura (2017–2022)",
+    orgao: "Ministério da Saúde, DATASUS",
+    url: "https://tabnet.datasus.gov.br/cgi/dhdat.exe?bd_pni/cpnibr.def",
+  },
+  painelCobertura: {
+    id: "painelCobertura",
+    titulo: "Painel de cobertura vacinal do Calendário Nacional, por local de aplicação (2023 em diante)",
+    orgao: "Ministério da Saúde",
+    url: "https://infoms.saude.gov.br/extensions/SEIDIGI_DEMAS_VACINACAO_CALENDARIO_NACIONAL_COBERTURA_OCORRENCIA/SEIDIGI_DEMAS_VACINACAO_CALENDARIO_NACIONAL_COBERTURA_OCORRENCIA.html",
   },
   datasusSinan: {
     id: "datasusSinan",

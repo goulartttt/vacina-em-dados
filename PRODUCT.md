@@ -57,10 +57,10 @@ entender e se proteger; páginas por estado, cidade (com as UBS) e doença.
 
 ## Evidence on Hand
 
-- Banco Supabase com cobertura da tríplice viral 1999–2018 (oficial) e casos de
+- Banco Supabase com cobertura da tríplice viral 1999–2025 (oficial) e casos de
   sarampo 2007–2026 (SINAN), por município, estado e Brasil.
 - Fatos-âncora dos dados: cobertura da 1ª dose abaixo da meta de 95% a partir de
-  2016 (Brasil 95,4% em 2016, 90,9% em 2017); 9.323 casos de sarampo em 2018
+  2017 (Brasil 95,4% em 2016, 86,2% em 2017, 74,9% em 2021), com volta a 95,9% em 2024 e 93,1% em 2025; 9.323 casos de sarampo em 2018
   (8.791 no Amazonas) e 21.967 em 2019, depois de anos com quase nenhum.
 - Não existe: depoimentos, fotos próprias, logo. Textos de saúde precisam de
   fonte oficial em cada trecho (sem revisor da área de saúde).
