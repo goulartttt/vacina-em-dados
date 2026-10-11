@@ -1,6 +1,7 @@
 // Constantes que servem ao servidor e ao navegador.
 export const BRASIL = 1;
 export const VACINA_SARAMPO = "triplice_viral_d1";
+export const VACINA_SARAMPO_D2 = "triplice_viral_d2";
 export const DOENCA_SARAMPO = "sarampo";
 /** Meta de cobertura do Ministério da Saúde para a tríplice viral. */
 export const META_COBERTURA = 95;

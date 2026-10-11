@@ -18,64 +18,64 @@ export default function Calendario() {
     <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 sm:pt-8 lg:px-8">
       <TopoInterno voltar={{ href: "/", rotulo: "Voltar ao painel" }} itens={[{ href: "/", rotulo: "Início" }, { rotulo: "Calendário" }]} />
       <header className="max-w-3xl">
-        <span className="etiqueta">Calendário Nacional de Vacinação</span>
-        <h1 className="titulo mt-3 text-[2.5rem] sm:text-6xl">Sua vacina está em dia?</h1>
+        <h1 className="titulo text-[2.25rem] sm:text-5xl">Sua vacina está em dia?</h1>
         <p className="mt-4 text-lg text-tinta-2">
-          As vacinas que o SUS oferece de graça em cada fase da vida. “Conforme o histórico” quer dizer que depende das doses que você já
-          tomou: leve a caderneta à UBS e a equipe confere o que falta.
+          As vacinas do Calendário Nacional de Vacinação, que o SUS oferece de graça em cada fase da vida. “Conforme o histórico” quer dizer
+          que depende das doses que você já tomou: leve a caderneta à UBS e a equipe confere o que falta.
           <Fonte fonte={FONTES.msCalendario} />
         </p>
       </header>
 
-      <nav aria-label="Fases da vida" className="mt-8">
-        <ul className="flex flex-wrap gap-2">
-          {CALENDARIO.map((f) => (
-            <li key={f.id}>
-              <a href={`#${f.id}`} className="block rounded-full border border-linha bg-folha px-4 py-2 font-bold text-tinta-2 no-underline hover:border-azul hover:text-azul">
-                {f.nome}
-              </a>
-            </li>
-          ))}
-        </ul>
+      <nav aria-label="Fases da vida" className="mt-6 flex flex-wrap items-center gap-x-1 gap-y-1 text-[0.9375rem]">
+        <span className="mr-2 text-tinta-2">Ir para:</span>
+        {CALENDARIO.map((f, i) => (
+          <span key={f.id} className="flex items-center gap-1">
+            {i > 0 && (
+              <span className="text-tinta-3" aria-hidden="true">
+                ·
+              </span>
+            )}
+            <a href={`#${f.id}`} className="rounded px-1.5 py-1 font-semibold text-azul hover:bg-azul-claro">
+              {f.nome}
+            </a>
+          </span>
+        ))}
       </nav>
 
-      <div className="mt-8 space-y-6">
+      <div className="mt-8 space-y-5">
         {CALENDARIO.map((f) => (
           <section key={f.id} id={f.id} aria-labelledby={`${f.id}-titulo`} className="cartao scroll-mt-24 p-5 sm:p-7">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 id={`${f.id}-titulo`} className="titulo text-3xl">
-                {f.nome} <span className="text-xl font-semibold text-tinta-3">· {f.faixa}</span>
+            <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-linha pb-3">
+              <h2 id={`${f.id}-titulo`} className="titulo text-[1.75rem]">
+                {f.nome} <span className="text-lg font-medium text-tinta-2">· {f.faixa}</span>
               </h2>
               <Fonte fonte={f.fonte} rotulo="Calendário oficial desta fase" />
             </div>
-            <ol className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {/* Idade à esquerda, vacinas à direita: lê-se como uma tabela. */}
+            <dl className="divide-y divide-grade">
               {f.doses.map((d) => (
-                <li key={d.quando} className="rounded-2xl bg-fundo p-4">
-                  <p className="flex items-center gap-2 font-titulo text-lg font-extrabold text-azul">
-                    <Icone nome="calendario" className="size-5" />
-                    {d.quando}
-                  </p>
-                  <ul className="mt-2 space-y-1 text-[0.9375rem]">
-                    {d.vacinas.map((v) => (
-                      <li key={v} className="flex gap-2">
-                        <Icone nome="ok" className="mt-[3px] size-4 text-ok" />
-                        {v}
-                      </li>
-                    ))}
-                  </ul>
-                </li>
+                <div key={d.quando} className="grid gap-x-6 gap-y-1 py-3 sm:grid-cols-[11rem_1fr]">
+                  <dt className="font-titulo text-[1.0625rem] font-bold text-azul">{d.quando}</dt>
+                  <dd>
+                    <ul className="grid gap-x-6 gap-y-1 text-[0.9375rem] md:grid-cols-2">
+                      {d.vacinas.map((v) => (
+                        <li key={v}>{v}</li>
+                      ))}
+                    </ul>
+                  </dd>
+                </div>
               ))}
-            </ol>
+            </dl>
           </section>
         ))}
       </div>
 
-      <section className="cartao mt-8 flex flex-col gap-4 bg-azul p-6 text-white sm:flex-row sm:items-center sm:justify-between sm:p-8">
+      <section className="mt-8 flex flex-col gap-4 border-t border-linha pt-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="titulo text-3xl">Falta alguma dose?</h2>
-          <p className="mt-1 text-lg opacity-90">Veja as UBS da sua cidade, com endereço, telefone e mapa.</p>
+          <h2 className="titulo text-2xl">Falta alguma dose?</h2>
+          <p className="mt-1 text-tinta-2">Veja as UBS da sua cidade, com endereço, telefone e mapa.</p>
         </div>
-        <Link href="/onde-se-vacinar" className="botao shrink-0 bg-folha text-azul hover:bg-azul-claro">
+        <Link href="/onde-se-vacinar" className="botao botao-azul shrink-0">
           Onde se vacinar <Icone nome="seta" className="size-4" />
         </Link>
       </section>

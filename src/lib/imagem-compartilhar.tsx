@@ -30,21 +30,21 @@ const FONTES = (async () => {
 
 // Mesmas cores do site (globals.css).
 const COR = {
-  fundo: "#f5f8fc",
+  fundo: "#fafaf7",
   folha: "#ffffff",
-  tinta: "#172133",
-  tinta2: "#3a475c",
-  azul: "#2156d9",
-  linha: "#dce4f0",
-  okFundo: "#e3f5eb",
-  ok: "#23a061",
+  tinta: "#263640",
+  tinta2: "#596a73",
+  azul: "#245a73",
+  linha: "#dfe6e8",
+  okFundo: "#e8f2ec",
+  ok: "#3a8a5c",
 };
 
 const SELO: Record<Situacao, { texto: string; fundo: string; tinta: string }> = {
-  ok: { texto: "Adequado: atingiu a meta de 95%", fundo: "#e3f5eb", tinta: "#11703e" },
-  alerta: { texto: "Alerta: abaixo da meta de 95%", fundo: "#fff4d6", tinta: "#865300" },
-  critico: { texto: "Crítico: abaixo de 80%", fundo: "#fde8ea", tinta: "#a51d31" },
-  vazio: { texto: "Sem dado oficial", fundo: "#eef2f7", tinta: "#4f5d74" },
+  ok: { texto: "Adequado: atingiu a meta de 95%", fundo: "#e8f2ec", tinta: "#247548" },
+  alerta: { texto: "Alerta: abaixo da meta de 95%", fundo: "#faf1de", tinta: "#8a5a00" },
+  critico: { texto: "Crítico: abaixo de 80%", fundo: "#f8e8ea", tinta: "#b42335" },
+  vazio: { texto: "Sem dado oficial", fundo: "#eef2f2", tinta: "#596a73" },
 };
 
 function curva(serie: PontoCobertura[], largura: number, altura: number) {
@@ -83,22 +83,22 @@ export async function imagemDoLugar({ titulo, subtitulo, serie }: { titulo: stri
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 30, fontWeight: 800 }}>
-          <div style={{ display: "flex", width: 44, height: 44, borderRadius: 12, background: COR.azul }} />
+          <div style={{ display: "flex", width: 40, height: 40, borderRadius: 8, background: COR.azul }} />
           Vacina em Dados
         </div>
         <div style={{ display: "flex", flex: 1, marginTop: 28, gap: 48 }}>
           <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-            <div style={{ display: "flex", fontSize: titulo.length > 22 ? 58 : 72, fontWeight: 800, lineHeight: 1.02, letterSpacing: -2 }}>{titulo}</div>
+            <div style={{ display: "flex", fontSize: titulo.length > 22 ? 56 : 68, fontWeight: 800, lineHeight: 1.04, letterSpacing: -1.5 }}>{titulo}</div>
             <div style={{ display: "flex", fontSize: 28, color: COR.tinta2, marginTop: 16 }}>{subtitulo}</div>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 12, marginTop: "auto" }}>
               <div style={{ display: "flex", fontSize: 96, fontWeight: 800, letterSpacing: -3, lineHeight: 1 }}>{valor !== null ? porcentagem(valor) : "—"}</div>
-              <div style={{ display: "flex", fontSize: 28, padding: "8px 18px", borderRadius: 999, background: selo.fundo, color: selo.tinta }}>{selo.texto}</div>
+              <div style={{ display: "flex", fontSize: 28, padding: "8px 16px", borderRadius: 6, background: selo.fundo, color: selo.tinta }}>{selo.texto}</div>
             </div>
             <div style={{ display: "flex", fontSize: 24, color: COR.tinta2, marginTop: 10 }}>
               Crianças de 1 ano vacinadas{ultimo ? ` em ${ultimo.ano}` : ""} · Ministério da Saúde
             </div>
           </div>
-          <div style={{ display: "flex", width: 560, background: COR.folha, border: `2px solid ${COR.linha}`, borderRadius: 24, padding: 20 }}>
+          <div style={{ display: "flex", width: 560, background: COR.folha, border: `2px solid ${COR.linha}`, borderRadius: 14, padding: 20 }}>
             <svg width="520" height="300" viewBox="0 -20 520 300">
               <rect x="0" y="-20" width="520" height={y95 + 20} fill={COR.okFundo} />
               <line x1="0" x2="520" y1={y95} y2={y95} stroke={COR.ok} strokeWidth="3" strokeDasharray="10 8" />

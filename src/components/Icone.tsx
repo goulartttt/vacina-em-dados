@@ -20,7 +20,10 @@ export type NomeIcone =
   | "calendario"
   | "relogio"
   | "vento"
-  | "escudo";
+  | "escudo"
+  | "compartilhar"
+  | "tocar"
+  | "pausar";
 
 const DESENHOS: Record<NomeIcone, React.ReactNode> = {
   ok: (
@@ -100,6 +103,9 @@ const DESENHOS: Record<NomeIcone, React.ReactNode> = {
       <path d="m7.2 10 2 2 3.8-4" />
     </>
   ),
+  compartilhar: <path d="M10 2.8v10M6.2 6.6 10 2.8l3.8 3.8M4.2 10.6v4.9a1.7 1.7 0 0 0 1.7 1.7h8.2a1.7 1.7 0 0 0 1.7-1.7v-4.9" />,
+  tocar: <path d="M6.5 4.2v11.6l9.2-5.8z" fill="currentColor" />,
+  pausar: <path d="M7 4.5v11M13 4.5v11" />,
 };
 
 export function Icone({ nome, className = "size-5", rotulo }: { nome: NomeIcone; className?: string; rotulo?: string }) {

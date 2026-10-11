@@ -12,7 +12,7 @@ const ESTILO: Record<Situacao, string> = {
 /** Situação da cobertura: sempre ícone + palavra, nunca só cor. */
 export function Selo({ tipo, children, className = "" }: { tipo: Situacao; children?: React.ReactNode; className?: string }) {
   return (
-    <span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.8125rem] leading-none font-bold whitespace-nowrap ${ESTILO[tipo]} ${className}`}>
+    <span className={`inline-flex w-fit items-center gap-1.5 rounded px-2 py-1 text-[0.8125rem] leading-none font-semibold whitespace-nowrap ${ESTILO[tipo]} ${className}`}>
       {tipo !== "vazio" && <Icone nome={tipo} className="size-4" />}
       {children ?? SITUACOES[tipo].nome}
     </span>

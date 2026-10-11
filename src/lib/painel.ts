@@ -1,9 +1,14 @@
 // Tipos e contas do painel, usados no servidor e no navegador.
 // As séries vão como listas alinhadas aos anos (compactas no envio):
-// cob[i] é a cobertura de anos.cobertura[0] + i; cas[i], os casos de
-// anos.casos[0] + i.
+// cob[i] é a cobertura (1ª dose) de anos.cobertura[0] + i; cob2[i], a da
+// 2ª dose; cas[i], os casos de anos.casos[0] + i.
 
-export type Serie = { cob: (number | null)[]; cas: number[] };
+export type Serie = { cob: (number | null)[]; cob2: (number | null)[]; cas: number[] };
+export type Dose = 1 | 2;
+
+/** A mesma série com a cobertura da dose escolhida no lugar de "cob": assim
+ *  mapa, números, gráfico e tabela funcionam igual para as duas doses. */
+export const naDose = <T extends Serie>(s: T, dose: Dose): T => (dose === 1 ? s : { ...s, cob: s.cob2 });
 export type Anos = { cobertura: [number, number]; casos: [number, number] };
 export type Regiao = Serie & { id: number; nome: string; href: string };
 export type Malha = { altura: number; formas: [id: number, d: string][] };

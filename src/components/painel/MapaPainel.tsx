@@ -6,7 +6,7 @@ import { useRef, useState } from "react";
 import { FAIXAS_CASOS, faixaCasos, situacao, SITUACOES } from "@/lib/constantes";
 import { numero, pontos, porcentagem } from "@/lib/formato";
 import { LARGURA_MAPA } from "@/lib/mapa-base";
-import { casosEm, coberturaEm, praticamenteIgual, type Anos, type Malha, type Modo, type Regiao } from "@/lib/painel";
+import { casosEm, coberturaEm, praticamenteIgual, type Anos, type Dose, type Malha, type Modo, type Regiao } from "@/lib/painel";
 
 import { Icone } from "../Icone";
 import { Selo } from "../Situacao";
@@ -20,6 +20,7 @@ type Props = {
   anos: Anos;
   periodo: [number, number];
   tipo: "estado" | "cidade";
+  dose: Dose;
   anoParcial: number | null;
   resumo: string;
   aoSelecionar: (id: number | null) => void;
@@ -28,7 +29,7 @@ type Props = {
 // Mapa clicável. Passar o mouse mostra o resumo do lugar; tocar ou clicar
 // fixa a escolha (e a linha do lugar aparece no gráfico). A tabela abaixo
 // do mapa traz os mesmos números para quem usa teclado ou leitor de tela.
-export function MapaPainel({ malha, regioes, modo, anos, periodo, tipo, anoParcial, resumo, aoSelecionar }: Props) {
+export function MapaPainel({ malha, regioes, modo, anos, periodo, tipo, dose, anoParcial, resumo, aoSelecionar }: Props) {
   const [passando, setPassando] = useState<Alvo | null>(null);
   const [fixo, setFixo] = useState<Alvo | null>(null);
   const silencio = useRef(false);
@@ -104,6 +105,7 @@ export function MapaPainel({ malha, regioes, modo, anos, periodo, tipo, anoParci
           anos={anos}
           periodo={periodo}
           tipo={tipo}
+          dose={dose}
           anoParcial={anoParcial}
           fixo={fixo?.id === alvo.id}
           aoFechar={() => fixar(null)}
@@ -120,6 +122,7 @@ function Detalhe({
   anos,
   periodo: [inicio, fim],
   tipo,
+  dose,
   anoParcial,
   fixo,
   aoFechar,
@@ -130,6 +133,7 @@ function Detalhe({
   anos: Anos;
   periodo: [number, number];
   tipo: "estado" | "cidade";
+  dose: Dose;
   anoParcial: number | null;
   fixo: boolean;
   aoFechar: () => void;
@@ -155,7 +159,9 @@ function Detalhe({
         </div>
         <p className="mt-1">
           <span className="numero text-[2rem]">{v === null ? "sem dado" : porcentagem(v)}</span>{" "}
-          <span className="text-sm text-tinta-2">das crianças de 1 ano vacinadas em {fim}</span>
+          <span className="text-sm text-tinta-2">
+            das crianças de 1 ano {dose === 1 ? "vacinadas" : "com a 2ª dose"} em {fim}
+          </span>
         </p>
         {diferenca !== null &&
           (praticamenteIgual(diferenca) ? (
@@ -188,7 +194,7 @@ function Detalhe({
 
   return (
     <div
-      className="aparece relative z-10 mt-3 w-full rounded-2xl border border-linha bg-folha p-4 shadow-[0_16px_36px_-12px_rgb(23_33_51/0.35)] sm:absolute sm:top-(--y) sm:left-(--x) sm:mt-0 sm:w-72 sm:translate-x-(--tx) sm:translate-y-(--ty)"
+      className="aparece relative z-10 mt-3 w-full rounded-lg border border-linha bg-folha p-4 shadow-[0_12px_28px_-14px_rgb(38_54_64/0.4)] sm:absolute sm:top-(--y) sm:left-(--x) sm:mt-0 sm:w-72 sm:translate-x-(--tx) sm:translate-y-(--ty)"
       style={estilo}
     >
       {corpo}
@@ -198,7 +204,7 @@ function Detalhe({
           <Icone nome="seta" className="size-4" />
         </Link>
         {fixo && (
-          <button type="button" onClick={aoFechar} className="rounded-full p-1.5 text-tinta-3 hover:bg-grade hover:text-tinta" aria-label="Fechar">
+          <button type="button" onClick={aoFechar} className="rounded-md p-1.5 text-tinta-2 hover:bg-grade hover:text-tinta" aria-label="Fechar">
             <Icone nome="fechar" className="size-4" />
           </button>
         )}

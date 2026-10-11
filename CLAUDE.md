@@ -161,6 +161,26 @@ entre 4 opções numa página de escolha.
 - **Autonomia:** o Alexandre deu a direção e pediu para ser avisado só no
   fim; as demais escolhas desta rodada são minhas, registradas aqui.
 
+### Front (rodada 5, 11/10/2026: saúde pública contemporânea)
+
+O Alexandre achou o site com "cara de feito por IA" e definiu a direção e a
+paleta (substituem as cores da rodada 4; a estrutura do "Painel vivo"
+continua). Regras completas no `DESIGN.md`.
+
+- **Paleta:** azul-petróleo `#245A73` (marca e ações), azul suave `#E8F0F3`,
+  fundo `#FAFAF7`, texto `#263640` e `#596A73`, linhas `#DFE6E8`; terracota
+  `#C65F35` (casos), roxo `#69578B` (mitos); situação com tinta para texto
+  (`#247548`, `#8A5A00`, `#B42335`) e base mais clara para preencher mapa e
+  pontos (`#3A8A5C`, `#D9A23A`, `#B9364A`). Os nomes de token antigos
+  (`azul`, `lilas`) ficaram como nomes de função.
+- **Fora:** rótulo/pílula acima dos títulos (virou linha fina abaixo),
+  pílulas em botões e legendas, cartões iguais, sombras em tudo, títulos em
+  800, verde/vermelho como enfeite em "como prevenir"/"sinal de alerta",
+  ✓ verdes no calendário, ícones decorativos em blocos de título.
+- **Tabela por estado/cidade** com altura fixa e rolagem própria; **"Entenda
+  e se proteja"** em composição (doença + mito | calendário | faixa "Onde se
+  vacinar"), sem cartões esticados.
+
 ## Arquitetura
 
 - O site (Next.js) lê do Supabase **apenas no servidor**, com a chave
@@ -191,13 +211,25 @@ entre 4 opções numa página de escolha.
   tipos e contas usados no servidor e no navegador (séries em listas
   alinhadas aos anos). Situações e faixas em `src/lib/constantes.ts`.
 - Painel (`src/components/painel/`, no navegador): `Painel` junta filtros
-  (De, Até, Lugar, Vacinação/Casos), números grandes, `MapaPainel` (passar o
-  mouse mostra o resumo, clicar fixa e desenha a linha no gráfico),
-  `BarraAnos` (dois controles deslizantes nativos), `Evolucao` (gráfico em
-  duas larguras) e `TabelaRegioes` (ordem alfabética, sem ranking).
-  Cobertura e casos nunca no mesmo eixo.
+  (De, Até, Lugar, Vacinação/Casos, Dose 1ª/2ª, Compartilhar), números
+  grandes, `MapaPainel` (passar o mouse mostra o resumo, clicar fixa e
+  desenha a linha no gráfico), `BarraAnos` (dois controles deslizantes
+  nativos + "Ver os anos passando"), `Evolucao` (vacinação em cima e casos
+  embaixo, mesmos anos, com destaques automáticos de menor cobertura e pico
+  de casos; duas larguras) e `TabelaRegioes` (ordem alfabética, sem
+  ranking). Cobertura e casos nunca no mesmo eixo.
+- Melhorias de interface de 11/10 (demanda `feature/PROD-V1.1/melhorias-interface`):
+  a série leva `cob` (1ª dose) e `cob2` (2ª dose); `naDose()` troca a dose
+  em todo o painel. Filtros no endereço (`?ver=casos&de=&ate=&dose=2`),
+  lidos depois de abrir (a página continua estática) e levados junto ao
+  trocar de lugar. "Compartilhar": menu do aparelho no celular, copia o
+  link no computador. "Ver os anos passando": um ano a cada 0,8 s. No
+  celular, filtros numa barra-resumo presa no topo (precisa ser filha direta
+  do bloco do `Painel` para continuar presa; no computador, grade de 2
+  colunas com título e filtros lado a lado).
 - Página do estado: as cidades (mapa + séries) vêm de `/mapas/[uf]`, baixado
-  depois que a página abre (SP: ~280 KB).
+  depois que a página abre (SP: ~400 KB sem compressão, com as duas doses
+  e a série até 2025; a Vercel comprime).
 - Conteúdo em `src/conteudo/` (fontes, mitos, calendário, sarampo); cartões
   em `src/components/cartoes/`; UBS em `ListaUbs` (filtro por bairro e
   "Perto de mim"; `Permissions-Policy: geolocation=(self)`).
@@ -336,6 +368,13 @@ Vale para banco, API, rotinas e front. Não só o básico.
   (doses opcional + apaga a fonte antiga em `atualizacoes`): o MCP recusou
   (tem "drop"/"delete"), então o Alexandre roda no SQL Editor do Supabase.
   Rodada e conferida (Security Advisor limpo, escrita anônima recusada).
+- Demanda commitada (`a821c32`) e levada para `HML-V1.1` e `PROD-V1.1`
+  (10/10, a pedido do Alexandre; nenhuma está na Vercel ainda).
+- 11/10, demanda `feature/PROD-V1.1/melhorias-interface` (gráfico duplo,
+  2ª dose, filtros no link, compartilhar, anos passando, filtros compactos no
+  celular e o redesenho "saúde pública contemporânea") levada para
+  `HML-V1.2` e `PROD-V1.2`. A branch padrão do GitHub é a `PROD-V1.1`
+  (trocar para a `PROD-V1.2`). Próxima demanda nasce da `PROD-V1.2`.
 - Na mesma demanda: cobertura 2023–2025 pelo painel do Ministério
   (`painel.py` + `painel.mjs`). Série completa 1994–2025. Falta ver a
   primeira coleta no GitHub Actions (o Chrome do Ubuntu 24.04 precisa
