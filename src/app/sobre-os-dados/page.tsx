@@ -64,7 +64,7 @@ const LIMITES = [
   "A cobertura conta onde a vacina foi aplicada. Por isso uma cidade que vacina crianças de cidades vizinhas pode passar de 100%. O número é mostrado como foi publicado, com a explicação ao lado.",
   "Em municípios pequenos, poucas doses mudam muito a porcentagem. A página da cidade avisa quando a população-alvo é pequena.",
   "Os casos dos anos recentes são preliminares e ainda podem ser revisados pelo Ministério da Saúde. O ano em andamento aparece como parcial.",
-  "Os óbitos por sarampo ainda não aparecem no site: os números do SINAN estão sendo conferidos com os balanços oficiais.",
+  "As mortes por sarampo são as registradas no SINAN como “óbito pelo agravo”, conferidas com a tabulação oficial do TabNet. Boletins publicados na época podem trazer números diferentes: em 2026 o Ministério da Saúde pediu aos estados a revisão do banco de doenças exantemáticas do SINAN, e os números ainda podem mudar.",
   "Não há dados oficiais abertos de vacinação por bairro para o Brasil. Por isso o site vai até o município.",
 ];
 

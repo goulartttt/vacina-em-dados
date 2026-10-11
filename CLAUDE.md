@@ -237,7 +237,8 @@ continua). Regras completas no `DESIGN.md`.
   por ISR), `/doencas/sarampo`, `/mitos-e-verdades`, `/calendario`,
   `/onde-se-vacinar`, `/sobre-os-dados`, `/mapas/[uf]`, `/indice-municipios`
   (lista da busca), imagens de compartilhamento, `sitemap.xml` e `robots.txt`.
-- Óbitos ficam fora do site até a conferência com o Ministério.
+- Óbitos: só na página do sarampo ("Mortes por sarampo desde 2018"), com a
+  ressalva de revisão do SINAN (ver Regras dos dados).
 - Componentes da primeira versão (Laudo, Rolagem, gráficos do servidor)
   foram retirados do código; uma cópia ficou fora do projeto, na pasta
   temporária da sessão de 09/10.
@@ -290,9 +291,16 @@ A documentação da API de Dados Abertos fica em
   de residência; confirmado pela classificação final (sarampo = `CLASSI_FIN`
   1); óbito = `EVOLUCAO` 2. Brasil e estados têm linha mesmo com zero casos;
   município sem linha = zero casos.
-- **A conferir antes de publicar:** óbitos por sarampo (SINAN dá 21 em 2019;
-  o Ministério divulgou 15). A cobertura 2017–2018 foi conferida em 10/10:
-  os arquivos divergiam e foram trocados pelo TabNet.
+- **Óbitos (conferidos em 11/10/2026):** os do banco (EVOLUCAO 2) batem
+  exatamente com o TabNet oficial `sinannet/cnv/exantbr.def` (Class. Final
+  = Sarampo × Evolução "óbito pelo agravo"): 1 em 2013, 11 em 2018, 21 em
+  2019, 11 em 2020, 2 em 2021, 2 em 2022. O "15 em 2019" de boletim não foi
+  confirmado (boletim em PDF ilegível sem ferramenta) e não aparece no site.
+  A Nota Técnica Conjunta 34/2026 do Ministério diz que o SINAN tem
+  inconsistências em revisão e que o Boletim de Notificação Semanal reflete
+  melhor o cenário; por isso o site mostra os óbitos do SINAN com essa
+  ressalva, só na página do sarampo. A cobertura 2017–2018 foi conferida em
+  10/10: os arquivos divergiam e foram trocados pelo TabNet.
 
 ## Comandos
 
@@ -375,6 +383,16 @@ Vale para banco, API, rotinas e front. Não só o básico.
   celular e o redesenho "saúde pública contemporânea") levada para
   `HML-V1.2` e `PROD-V1.2`. A branch padrão do GitHub é a `PROD-V1.1`
   (trocar para a `PROD-V1.2`). Próxima demanda nasce da `PROD-V1.2`.
+- 11/10, demanda `feature/PROD-V1.2/fechamento-v1`, levada para `HML-V1.3`
+  e `PROD-V1.3` (branch padrão do GitHub: trocar para a `PROD-V1.3`):
+  óbitos conferidos com o TabNet e mostrados na página do sarampo com
+  ressalva; "Quais vacinas eu preciso?" (`src/components/QuaisVacinas.tsx`,
+  no alto de `/calendario`, atalho no cartão do calendário): idade em
+  meses/anos + "Está grávida", usa só `src/conteudo/calendario.ts` (linhas
+  com idade fixa viram meses; "Conforme o histórico" vai para "conforme a
+  caderneta"), conta no navegador, nada guardado. Falta: revisão do
+  Alexandre (textos de saúde, calendário, "Perto de mim" no celular com
+  HTTPS) e publicar.
 - Na mesma demanda: cobertura 2023–2025 pelo painel do Ministério
   (`painel.py` + `painel.mjs`). Série completa 1994–2025. Falta ver a
   primeira coleta no GitHub Actions (o Chrome do Ubuntu 24.04 precisa

@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { Fonte } from "@/components/Fonte";
 import { Icone } from "@/components/Icone";
+import { QuaisVacinas } from "@/components/QuaisVacinas";
 import { TopoInterno } from "@/components/Voltar";
 import { CALENDARIO } from "@/conteudo/calendario";
 import { AVISO_MEDICO, FONTES } from "@/conteudo/fontes";
@@ -26,7 +27,12 @@ export default function Calendario() {
         </p>
       </header>
 
-      <nav aria-label="Fases da vida" className="mt-6 flex flex-wrap items-center gap-x-1 gap-y-1 text-[0.9375rem]">
+      <div className="mt-8">
+        <QuaisVacinas fases={CALENDARIO} />
+      </div>
+
+      <h2 className="titulo mt-12 text-[1.75rem] sm:text-[2.125rem]">O calendário completo</h2>
+      <nav aria-label="Fases da vida" className="mt-3 flex flex-wrap items-center gap-x-1 gap-y-1 text-[0.9375rem]">
         <span className="mr-2 text-tinta-2">Ir para:</span>
         {CALENDARIO.map((f, i) => (
           <span key={f.id} className="flex items-center gap-1">

@@ -8,7 +8,7 @@ import { TopoInterno } from "@/components/Voltar";
 import { AVISO_MEDICO, FONTES } from "@/conteudo/fontes";
 import { MITOS } from "@/conteudo/mitos";
 import { SARAMPO } from "@/conteudo/sarampo";
-import { atualizacoes, BRASIL } from "@/lib/dados";
+import { atualizacoes, BRASIL, serieCasos } from "@/lib/dados";
 import { anoParcial } from "@/lib/datas";
 import { numero, porcentagem } from "@/lib/formato";
 import { casosEm, coberturaEm } from "@/lib/painel";
@@ -29,9 +29,14 @@ const FICHAS = [
   { titulo: "Como prevenir", texto: SARAMPO.prevencao },
 ];
 
+/** Ano em que o sarampo voltou ao Brasil depois de anos quase sem casos. */
+const INICIO_SURTO = 2018;
+
 export default async function Sarampo() {
   const anos = await anosDoPainel();
-  const [series, fontes] = await Promise.all([seriesDoBrasil(anos), atualizacoes()]);
+  const [series, fontes, casosBrasil] = await Promise.all([seriesDoBrasil(anos), atualizacoes(), serieCasos(BRASIL)]);
+  const comMortes = casosBrasil.filter((p) => p.ano >= INICIO_SURTO && (p.obitos ?? 0) > 0);
+  const mortes = { total: comMortes.reduce((t, p) => t + (p.obitos ?? 0), 0), porAno: comMortes.map((p) => ({ ano: p.ano, obitos: p.obitos ?? 0 })) };
   const brasil = series.get(BRASIL);
   const ultimoCob = anos.cobertura[1];
   const cobertura = brasil ? coberturaEm(brasil, anos, ultimoCob) : null;
@@ -119,27 +124,36 @@ export default async function Sarampo() {
         <h2 id="numeros" className="titulo text-[1.75rem] sm:text-[2.125rem]">
           O sarampo no Brasil, em números
         </h2>
-        <dl className="mt-5 grid divide-y divide-linha border-y border-linha sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-          <div className="py-4 sm:pr-6">
+        <dl className="mt-5 grid gap-px overflow-hidden rounded-lg border border-linha bg-linha sm:grid-cols-2 lg:grid-cols-4">
+          <div className="bg-folha p-4">
             <dt className="text-sm text-tinta-2">Crianças de 1 ano vacinadas em {ultimoCob}</dt>
             <dd className="numero mt-2 text-[2.25rem]">{cobertura === null ? "sem dado" : porcentagem(cobertura)}</dd>
           </div>
-          <div className="py-4 sm:px-6">
+          <div className="bg-folha p-4">
             <dt className="text-sm text-tinta-2">Maior número de casos num ano</dt>
             <dd className="numero mt-2 text-[2.25rem] text-casos-tinta">{pico ? numero(pico.casos) : "—"}</dd>
             {pico && <dd className="mt-1 text-sm text-tinta-2">em {pico.ano}</dd>}
           </div>
-          <div className="py-4 sm:pl-6">
+          <div className="bg-folha p-4">
             <dt className="text-sm text-tinta-2">
               Casos em {ultimoCas}
               {parcial ? " (até agora)" : ""}
             </dt>
             <dd className="numero mt-2 text-[2.25rem]">{casosAgora === null ? "sem dado" : numero(casosAgora)}</dd>
           </div>
+          <div className="bg-folha p-4">
+            <dt className="text-sm text-tinta-2">Mortes por sarampo desde {INICIO_SURTO}</dt>
+            <dd className="numero mt-2 text-[2.25rem]">{numero(mortes.total)}</dd>
+            <dd className="mt-1 text-sm text-tinta-2">{mortes.porAno.map((m) => `${numero(m.obitos)} em ${m.ano}`).join(", ")}</dd>
+          </div>
         </dl>
-        <p className="mt-4 text-sm text-tinta-3">
-          Vacinação: Ministério da Saúde, SI-PNI. Casos confirmados: SINAN.
-          <Fonte fonte={FONTES.datasusSinan} rotulo="DATASUS" />
+        <p className="mt-4 text-sm text-tinta-2">
+          Vacinação: Ministério da Saúde, SI-PNI. Casos confirmados e mortes: SINAN, pelo ano dos primeiros sintomas
+          <Fonte fonte={FONTES.datasusSinan} rotulo="DATASUS" />. As mortes são as registradas como “óbito pelo agravo”, os mesmos números da
+          tabulação oficial do TabNet
+          <Fonte fonte={FONTES.tabnetExantematicas} rotulo="TabNet" />. Boletins da época podem trazer números diferentes: o Ministério da Saúde
+          ainda revisa o banco do SINAN
+          <Fonte fonte={FONTES.notaSinanSarampo} rotulo="nota técnica de 2026" />.
         </p>
         <p className="mt-5">
           <Link href="/" className="botao botao-azul">

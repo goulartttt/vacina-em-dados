@@ -34,9 +34,12 @@ export function Cartoes({ id = "entenda" }: { id?: string }) {
               <CalendarioAbas fases={CALENDARIO} limite={3} />
             </div>
           </div>
-          <div className="border-t border-linha px-5 py-3 sm:px-6">
-            <Link href="/calendario" className="inline-flex items-center gap-1 text-[0.9375rem] font-semibold text-azul no-underline hover:text-azul-escuro">
-              Ver o calendário completo <Icone nome="seta" className="size-4" />
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-linha px-5 py-3 sm:px-6">
+            <Link href="/calendario#quais-vacinas" className="inline-flex items-center gap-1 text-[0.9375rem] font-semibold text-azul no-underline hover:text-azul-escuro">
+              Quais vacinas eu preciso? <Icone nome="seta" className="size-4" />
+            </Link>
+            <Link href="/calendario" className="text-[0.9375rem] font-semibold text-tinta-2 no-underline hover:text-azul">
+              Ver o calendário completo
             </Link>
           </div>
         </article>

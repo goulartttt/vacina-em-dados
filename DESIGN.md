@@ -199,3 +199,7 @@ outras cores só aparecem com função. O dado é o destaque, não a decoração
   vacinar" com a busca. Nada esticado para igualar alturas.
 - **UBS:** cartão com nome, endereço, turno e os botões "Ver no mapa" (cheio)
   e "Ligar" (contorno).
+- **Quais vacinas eu preciso?:** cartão com idade, unidade e "Está grávida";
+  o resultado destaca em azul suave as doses previstas para a idade exata e
+  lista, em linhas divididas, as anteriores, as próximas e as que dependem
+  da caderneta.
