@@ -393,6 +393,12 @@ Vale para banco, API, rotinas e front. Não só o básico.
   caderneta"), conta no navegador, nada guardado. Falta: revisão do
   Alexandre (textos de saúde, calendário, "Perto de mim" no celular com
   HTTPS) e publicar.
+- 11/10, demanda `feature/PROD-V1.3/checkup` (checkup antes da Vercel:
+  vazamento em 320 px por texto sr-only na tabela, menu do celular que
+  cortava itens, alvo de toque dos links de fonte, título da página inicial,
+  descrições até 160 caracteres, README) levada para `HML-V1.4` e
+  `PROD-V1.4`. Branch padrão do GitHub: trocar para a `PROD-V1.4`. Vercel:
+  produção acompanha `PROD-V1.4`, HML acompanha `HML-V1.4`.
 - Na mesma demanda: cobertura 2023–2025 pelo painel do Ministério
   (`painel.py` + `painel.mjs`). Série completa 1994–2025. Falta ver a
   primeira coleta no GitHub Actions (o Chrome do Ubuntu 24.04 precisa

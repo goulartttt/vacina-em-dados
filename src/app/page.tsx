@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Busca } from "@/components/Busca";
@@ -7,6 +8,11 @@ import { RodapeDados } from "@/components/RodapeDados";
 import { atualizacoes, BRASIL, estados } from "@/lib/dados";
 import { anoParcial } from "@/lib/datas";
 import { anosDoPainel, regioesDoBrasil, seriesDoBrasil } from "@/lib/paineis";
+
+export const metadata: Metadata = {
+  // O título do site sozinho ("Vacina em Dados") diz pouco na busca.
+  title: { absolute: "Vacina em Dados: vacinação e casos de sarampo no Brasil" },
+};
 
 export default async function Inicio() {
   const anos = await anosDoPainel();

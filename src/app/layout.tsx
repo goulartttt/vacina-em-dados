@@ -76,9 +76,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <div className="px-4 pb-3 sm:hidden">
             <Busca />
           </div>
-          {/* Fora da tela grande, o menu vira uma linha que desliza para o lado. */}
+          {/* Fora da tela grande, o menu quebra em linhas: tudo à vista, nada
+              cortado na borda (antes deslizava para o lado e escondia itens). */}
           <nav aria-label="Principal (celular)" className="border-t border-grade xl:hidden">
-            <ul className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-2 sm:px-6">
+            <ul className="mx-auto flex max-w-7xl flex-wrap gap-x-1 gap-y-0.5 px-3 py-1.5 sm:px-5">
               {MENU.map((m) => (
                 <li key={m.href} className="shrink-0">
                   <Link href={m.href} className="block rounded-md px-2.5 py-1.5 text-sm font-semibold text-tinta-2 no-underline hover:bg-azul-claro hover:text-azul">

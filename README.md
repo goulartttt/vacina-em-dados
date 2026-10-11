@@ -4,7 +4,8 @@ Site público que mostra, com dados oficiais, a relação entre a cobertura
 vacinal e os casos de doenças preveníveis por vacina em todo o Brasil, por
 estado e por município.
 
-> Em construção.
+Primeira doença: sarampo (cobertura da vacina tríplice viral × casos
+confirmados). As outras doenças preveníveis por vacina entram no mesmo molde.
 
 ## Tecnologias
 
@@ -46,8 +47,12 @@ Requisitos: Node.js 22 ou mais recente.
 
 ## Rotinas de dados (`pipeline/`)
 
-Python 3.14, sem dependências além do `psycopg`. Rodam toda segunda-feira no
-GitHub Actions (`.github/workflows/coleta.yml`) e também podem rodar à mão:
+Python 3.14, sem dependências além do `psycopg`. A cobertura de 2023 em
+diante é lida do painel público do Ministério da Saúde por um script em Node
+(`pipeline/coleta/painel.mjs`), que abre a página num Google Chrome sem
+janela: por isso a rotina de cobertura também precisa de Node.js e do Chrome
+instalados. Rodam toda segunda-feira no GitHub Actions
+(`.github/workflows/coleta.yml`) e também podem rodar à mão:
 
 ```bash
 cd pipeline
@@ -55,7 +60,7 @@ python -m venv .venv
 .venv\Scripts\activate            # Windows (no Linux/macOS: source .venv/bin/activate)
 pip install --require-hashes -r requirements.txt
 python -m unittest discover -s tests
-python -m coleta tudo             # ou: territorios | cobertura | sarampo
+python -m coleta tudo             # ou: territorios | cobertura | sarampo | ubs
 ```
 
 As rotinas gravam no banco com o usuário `coleta`, que só escreve nas
@@ -66,11 +71,13 @@ do banco fica em `supabase/migrations/`.
 ## Fontes de dados
 
 Todos os números vêm de fontes públicas oficiais. A lista completa, com a
-metodologia e as limitações, ficará na página "Sobre os dados" do site.
+metodologia, as datas de atualização e as limitações, está na página "Sobre
+os dados" do site.
 
-- Ministério da Saúde: DATASUS (PNI, SINAN), OpenDataSUS e API de Dados Abertos.
-- Fiocruz: InfoDengue.
-- IBGE: população e mapas.
+- Ministério da Saúde: arquivos do SI-PNI e do SINAN (DATASUS), TabNet,
+  painel de cobertura vacinal do Calendário Nacional e cadastro de
+  estabelecimentos de saúde (CNES, pela API de Dados Abertos).
+- IBGE: lista de estados e municípios e mapas.
 
 ## Segurança
 
@@ -78,8 +85,10 @@ metodologia e as limitações, ficará na página "Sobre os dados" do site.
 - O site lê o banco apenas pelo servidor. O navegador nunca acessa o banco.
 - Cabeçalhos de segurança (CSP, `X-Frame-Options` etc.) em `next.config.ts`.
 - `npm audit` acusa uma vulnerabilidade alta no pacote `braces`, usado só pelo
-  ESLint durante o desenvolvimento (não vai para o site publicado). Ainda não
-  há versão corrigida. Reavaliar quando houver.
+  ESLint durante o desenvolvimento (não vai para o site publicado:
+  `npm audit --omit=dev` dá zero). A correção automática rebaixaria o
+  `eslint-config-next` para a versão 14. Reavaliar quando houver versão
+  corrigida.
 
 ## Aviso
 

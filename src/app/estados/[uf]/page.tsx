@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: PageProps<"/estados/[uf]">): 
   if (!t) return { title: "Estado não encontrado" };
   return {
     title: `${t.nome}: vacinação contra o sarampo`,
-    description: `Cobertura da vacina tríplice viral ${noLugar(t)}, ano a ano e cidade por cidade, comparada com a meta de 95%, e os casos de sarampo. Dados oficiais do Ministério da Saúde.`,
+    description: `Vacinação contra o sarampo ${noLugar(t)} ano a ano e cidade por cidade, comparada com a meta de 95%, e os casos da doença. Dados oficiais.`,
   };
 }
 
