@@ -17,7 +17,7 @@ export default async function Inicio() {
   return (
     <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 sm:pt-8 lg:px-8">
       <Painel
-        etiqueta="Sarampo · vacina tríplice viral, 1ª dose"
+        assunto="Sarampo"
         titulo="Como está a vacinação contra o sarampo no Brasil?"
         nome="Brasil"
         anos={anos}
@@ -34,10 +34,10 @@ export default async function Inicio() {
 
       <section aria-labelledby="sua-cidade" className="cartao mt-10 grid gap-6 p-5 sm:p-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
         <div>
-          <h2 id="sua-cidade" className="titulo text-3xl sm:text-4xl">
+          <h2 id="sua-cidade" className="titulo text-[1.75rem] sm:text-[2.125rem]">
             E a sua cidade?
           </h2>
-          <p className="mt-2 text-lg text-tinta-2">Veja a vacinação, os casos e as UBS mais perto de você.</p>
+          <p className="mt-2 text-tinta-2">Veja a vacinação, os casos e as UBS mais perto de você.</p>
           <div className="mt-5 max-w-xl">
             <Busca grande />
           </div>
@@ -50,7 +50,7 @@ export default async function Inicio() {
                 <Link
                   href={`/estados/${u.slug}`}
                   title={u.nome}
-                  className="grid h-10 min-w-12 place-items-center rounded-xl border border-linha bg-fundo px-2 font-bold text-tinta-2 no-underline transition-colors hover:border-azul hover:bg-azul-claro hover:text-azul"
+                  className="grid h-10 min-w-12 place-items-center rounded-md border border-linha bg-folha px-2 font-semibold text-tinta-2 no-underline transition-colors hover:border-azul hover:bg-azul-claro hover:text-azul"
                 >
                   <span aria-hidden="true">{u.uf_sigla}</span>
                   <span className="sr-only">{u.nome}</span>

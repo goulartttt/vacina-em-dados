@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
 import { Fonte } from "@/components/Fonte";
-import { Icone } from "@/components/Icone";
 import { Selo } from "@/components/Situacao";
 import { TopoInterno } from "@/components/Voltar";
 import { FONTES } from "@/conteudo/fontes";
@@ -75,15 +74,14 @@ export default async function SobreOsDados() {
     <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 sm:pt-8 lg:px-8">
       <TopoInterno voltar={{ href: "/", rotulo: "Voltar ao painel" }} itens={[{ href: "/", rotulo: "Início" }, { rotulo: "Sobre os dados" }]} />
       <header className="max-w-3xl">
-        <span className="etiqueta">Transparência</span>
-        <h1 className="titulo mt-3 text-[2.75rem] sm:text-6xl">Sobre os dados</h1>
+        <h1 className="titulo text-[2.25rem] sm:text-5xl">Sobre os dados</h1>
         <p className="mt-4 text-lg text-tinta-2">
           Todos os números deste site vêm de fontes públicas oficiais. Nada é estimado por nós sem aviso, e cada número mostra de onde veio.
         </p>
       </header>
 
       <section aria-labelledby="situacoes" className="cartao mt-10 p-5 sm:p-8">
-        <h2 id="situacoes" className="titulo text-3xl">
+        <h2 id="situacoes" className="titulo text-[1.75rem]">
           As três situações
         </h2>
         <p className="mt-2 max-w-3xl text-tinta-2">
@@ -91,21 +89,21 @@ export default async function SobreOsDados() {
           ou mais não soma risco e abaixo de 80% soma o máximo. A OPAS usa mais faixas no meio; aqui elas foram juntadas em “alerta”.
           <Fonte fonte={FONTES.opasRisco} />
         </p>
-        <ul className="mt-5 grid gap-3 sm:grid-cols-3">
+        <ul className="mt-5 grid divide-y divide-linha border-y border-linha sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           {(["ok", "alerta", "critico"] as const).map((s) => (
-            <li key={s} className="rounded-2xl bg-fundo p-4">
+            <li key={s} className="py-4 sm:px-5 sm:first:pl-0">
               <Selo tipo={s} />
-              <p className="numero mt-3 text-2xl">{SITUACOES[s].faixa}</p>
+              <p className="numero mt-3 text-[1.5rem]">{SITUACOES[s].faixa}</p>
             </li>
           ))}
         </ul>
       </section>
 
       <section aria-labelledby="fontes" className="mt-12">
-        <h2 id="fontes" className="titulo text-3xl">
+        <h2 id="fontes" className="titulo text-[1.75rem]">
           Fontes e atualização
         </h2>
-        <div className="mt-5 overflow-x-auto rounded-2xl border border-linha bg-folha">
+        <div className="mt-5 overflow-x-auto rounded-xl border border-linha bg-folha">
           <table className="w-full min-w-[40rem] border-collapse text-left text-[0.9375rem]">
             <caption className="sr-only">Fontes de dados, data do arquivo na fonte e data da última coleta</caption>
             <thead className="bg-grade">
@@ -130,14 +128,14 @@ export default async function SobreOsDados() {
       </section>
 
       <section aria-labelledby="metodo" className="mt-12">
-        <h2 id="metodo" className="titulo text-3xl">
+        <h2 id="metodo" className="titulo text-[1.75rem]">
           Como os números são calculados
         </h2>
-        <dl className="mt-5 grid gap-4 md:grid-cols-2">
+        <dl className="cartao mt-5 max-w-4xl divide-y divide-linha">
           {METODO.map((m) => (
-            <div key={m.titulo} className="cartao p-5">
-              <dt className="font-titulo text-xl font-extrabold">{m.titulo}</dt>
-              <dd className="mt-1.5 text-tinta-2">
+            <div key={m.titulo} className="grid gap-x-8 gap-y-1 px-5 py-5 sm:px-6 md:grid-cols-[13rem_1fr]">
+              <dt className="font-titulo text-[1.125rem] font-bold">{m.titulo}</dt>
+              <dd className="text-tinta-2">
                 {m.texto}
                 <Fonte fonte={m.fonte} />
               </dd>
@@ -147,13 +145,12 @@ export default async function SobreOsDados() {
       </section>
 
       <section aria-labelledby="limites" className="mt-12">
-        <h2 id="limites" className="titulo text-3xl">
+        <h2 id="limites" className="titulo text-[1.75rem]">
           Limitações
         </h2>
-        <ul className="mt-5 grid gap-3 md:grid-cols-2">
+        <ul className="mt-5 max-w-4xl list-disc space-y-3 pl-5 text-tinta-2 marker:text-tinta-3">
           {LIMITES.map((l) => (
-            <li key={l} className="flex gap-3 rounded-2xl bg-folha p-4 text-tinta-2">
-              <Icone nome="alerta" className="mt-0.5 size-5 text-alerta-tinta" />
+            <li key={l} className="pl-1">
               {l}
             </li>
           ))}
@@ -161,7 +158,7 @@ export default async function SobreOsDados() {
       </section>
 
       <section aria-labelledby="privacidade" className="cartao mt-12 p-5 sm:p-8">
-        <h2 id="privacidade" className="titulo text-3xl">
+        <h2 id="privacidade" className="titulo text-[1.75rem]">
           Privacidade
         </h2>
         <p className="mt-3 max-w-3xl text-tinta-2">

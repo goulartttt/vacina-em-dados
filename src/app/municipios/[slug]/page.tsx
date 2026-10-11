@@ -72,7 +72,7 @@ async function Conteudo({ params }: Pick<PageProps<"/municipios/[slug]">, "param
         itens={[{ href: "/", rotulo: "Brasil" }, { href: `/estados/${uf.slug}`, rotulo: uf.nome }, { rotulo: t.nome }]}
       />
       <Painel
-        etiqueta="Sarampo · vacina tríplice viral, 1ª dose"
+        assunto="Sarampo"
         titulo={`Como está a vacinação contra o sarampo ${noLugar(t)}?`}
         nome={nome}
         anos={anos}
@@ -105,23 +105,18 @@ async function Conteudo({ params }: Pick<PageProps<"/municipios/[slug]">, "param
       </Painel>
 
       <section id="onde-se-vacinar" aria-labelledby="titulo-ubs" className="cartao mt-10 scroll-mt-24 p-5 sm:p-8">
-        <div className="flex items-center gap-3">
-          <span className="grid size-12 place-items-center rounded-2xl bg-azul-claro text-azul" aria-hidden="true">
-            <Icone nome="pin" className="size-6" />
-          </span>
-          <h2 id="titulo-ubs" className="titulo text-3xl">
-            Onde se vacinar {noLugar(t)}
-          </h2>
-        </div>
-        <p className="mt-3 max-w-3xl text-lg text-tinta-2">
+        <h2 id="titulo-ubs" className="titulo text-[1.75rem] sm:text-[2.125rem]">
+          Onde se vacinar {noLugar(t)}
+        </h2>
+        <p className="mt-2 max-w-3xl text-tinta-2">
           As vacinas do calendário são de graça nas unidades básicas de saúde (UBS). Leve a caderneta de vacinação e um documento.
           <Fonte fonte={FONTES.msCalendario} />
         </p>
         <div className="mt-5">
           <ListaUbs ubs={unidades} cidade={nome} />
         </div>
-        <p className="mt-5 flex items-start gap-2 rounded-2xl bg-alerta-fundo p-3.5 text-[0.9375rem] text-tinta">
-          <Icone nome="alerta" className="mt-0.5 size-5 text-alerta-tinta" />
+        <p className="mt-5 flex items-start gap-2 rounded-lg border border-linha bg-fundo p-3.5 text-[0.9375rem] text-tinta">
+          <Icone nome="fone" className="mt-0.5 size-5 text-azul" />
           <span>
             Ligue antes de ir: nem toda UBS tem sala de vacina aberta em todos os horários. Lista do cadastro oficial de estabelecimentos
             {cnes ? `, coletada em ${data(cnes.coletado_em)}` : ""}.
@@ -135,7 +130,7 @@ async function Conteudo({ params }: Pick<PageProps<"/municipios/[slug]">, "param
 
 function Nota({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-linha bg-folha p-4 text-[0.9375rem] text-tinta-2">
+    <div className="rounded-lg border border-linha bg-folha p-4 text-[0.9375rem] text-tinta-2">
       <p className="mb-1 font-bold text-tinta">{titulo}</p>
       {children}
     </div>

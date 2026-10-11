@@ -10,10 +10,13 @@ export function BarraAnos({
   limites,
   valor,
   aoMudar,
+  extra,
 }: {
   limites: [number, number];
   valor: [number, number];
   aoMudar: (v: [number, number]) => void;
+  /** Botão a mais ao lado dos atalhos (ex.: "Ver os anos passando"). */
+  extra?: React.ReactNode;
 }) {
   const [min, max] = limites;
   const [inicio, fim] = valor;
@@ -68,7 +71,8 @@ export function BarraAnos({
           <span>{max}</span>
         </div>
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
+        {extra}
         {[
           { rotulo: "Últimos 5 anos", v: ultimos5 },
           { rotulo: "Tudo", v: limites },
@@ -80,8 +84,8 @@ export function BarraAnos({
               type="button"
               aria-pressed={ativo}
               onClick={() => aoMudar(b.v)}
-              className={`rounded-full border px-3 py-1.5 text-sm font-bold whitespace-nowrap transition-colors ${
-                ativo ? "border-azul bg-azul text-white" : "border-linha bg-folha text-azul hover:border-azul"
+              className={`min-h-9 rounded-md border px-3 text-sm font-semibold whitespace-nowrap transition-colors ${
+                ativo ? "border-azul bg-azul-claro text-azul" : "border-linha bg-folha text-tinta-2 hover:border-azul hover:text-azul"
               }`}
             >
               {b.rotulo}

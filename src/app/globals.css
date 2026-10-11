@@ -1,54 +1,63 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------
-   Painel vivo: só tema claro (em saúde, o escuro foi lido como negativo).
-   Azul-vacina para a marca e as ações; as três cores de situação
-   (adequado, alerta, crítico) são reservadas para a situação da cobertura
-   e nunca viram decoração. Situação sempre vem com ícone e palavra.
-   Coral só para casos de doença. Decisão registrada no CLAUDE.md
-   (rodada 4) e no DESIGN.md.
+   Saúde pública contemporânea (11/10/2026): neutros quentes dominam,
+   azul-petróleo é a marca e as ações. Cores com função fixa:
+   terracota = casos de doença; roxo discreto = mitos e verdades;
+   verde, âmbar e vermelho = só a situação da cobertura, sempre com ícone
+   e palavra. Só tema claro (em saúde, o escuro foi lido como negativo).
+   Os nomes antigos (azul, lilas) continuam como nomes de função para não
+   espalhar troca de classes: "azul" é a marca, "lilas" é o tom dos mitos.
+   Decisão registrada no CLAUDE.md e no DESIGN.md.
    ------------------------------------------------------------------ */
 :root {
-  --fundo: #f5f8fc;
+  --fundo: #fafaf7;
   --folha: #ffffff;
-  --tinta: #172133;
-  --tinta-2: #3a475c;
-  --tinta-3: #4f5d74;
-  --linha: #dce4f0;
-  --grade: #eef2f7;
+  --tinta: #263640;
+  --tinta-2: #596a73;
+  --tinta-3: #66757c; /* 4,6:1 sobre o fundo: o mais claro permitido para texto */
+  --linha: #dfe6e8;
+  --campo: #ccd7da; /* borda de campos e controles: um passo mais forte que a linha */
+  --grade: #eef2f2;
 
-  --azul: #2156d9;
-  --azul-escuro: #1a45b0;
-  --azul-claro: #e6eeff;
-  --lilas: #7357e8;
-  --lilas-escuro: #5b3fd6;
-  --lilas-claro: #efebfe;
+  /* Marca (azul-petróleo) */
+  --azul: #245a73;
+  --azul-escuro: #1b4558;
+  --azul-claro: #e8f0f3;
+  /* Mitos e verdades */
+  --lilas: #69578b;
+  --lilas-escuro: #54446f;
+  --lilas-claro: #f2eff6;
 
-  --ok: #23a061;
-  --ok-tinta: #11703e;
-  --ok-fundo: #e3f5eb;
-  --ok-borda: #bfe5cf;
-  --alerta: #f2a900;
-  --alerta-tinta: #865300;
-  --alerta-fundo: #fff4d6;
-  --alerta-borda: #f3d98f;
-  --critico: #c62e40;
-  --critico-tinta: #a51d31;
-  --critico-fundo: #fde8ea;
-  --critico-borda: #f3bcc3;
-  --vazio: #d5dbe1;
+  /* Situação da cobertura: "tinta" para texto (AA sobre o fundo suave),
+     a cor base para preencher mapa, pontos e barras. */
+  --ok: #3a8a5c;
+  --ok-tinta: #247548;
+  --ok-fundo: #e8f2ec;
+  --ok-borda: #c5dfce;
+  --alerta: #d9a23a;
+  --alerta-tinta: #8a5a00;
+  --alerta-fundo: #faf1de;
+  --alerta-borda: #ead2a0;
+  --critico: #b9364a;
+  --critico-tinta: #b42335;
+  --critico-fundo: #f8e8ea;
+  --critico-borda: #ebc4c9;
+  --vazio: #d9dfe1;
 
-  /* Casos (mapa e barras): coral, do claro ao escuro. */
-  --casos: #d9480f;
-  --casos-tinta: #b03a0c;
-  --casos-0: #dfe6ef;
-  --casos-1: #ffe1cf;
-  --casos-2: #ffad80;
-  --casos-3: #f2703d;
-  --casos-4: #c2410c;
+  /* Casos (mapa e barras): terracota, do claro ao escuro. */
+  --casos: #c65f35;
+  --casos-tinta: #a44a25;
+  --casos-0: #e9edec;
+  --casos-1: #f5dccd;
+  --casos-2: #e6a784;
+  --casos-3: #cf774d;
+  --casos-4: #a2441f;
 
-  --foco: #1a45b0;
+  --foco: #1b4558;
   color-scheme: light;
+  /* Barras de rolagem no tom da página, não no cinza do sistema. */
+  scrollbar-color: #b9c6ca transparent;
 }
 
 @theme inline {
@@ -58,6 +67,7 @@
   --color-tinta-2: var(--tinta-2);
   --color-tinta-3: var(--tinta-3);
   --color-linha: var(--linha);
+  --color-campo: var(--campo);
   --color-grade: var(--grade);
   --color-azul: var(--azul);
   --color-azul-escuro: var(--azul-escuro);
@@ -101,14 +111,19 @@ body {
 }
 
 ::selection {
-  background: var(--azul);
-  color: var(--folha);
+  background: #cfe0e7;
+  color: var(--tinta);
 }
 
 :focus-visible {
   outline: 2px solid var(--foco);
   outline-offset: 3px;
-  border-radius: 4px;
+  border-radius: 3px;
+}
+
+/* Números em tabelas alinhados pela casa decimal. */
+table {
+  font-variant-numeric: tabular-nums;
 }
 
 a {
@@ -127,47 +142,41 @@ p {
 }
 
 @layer components {
-  /* Títulos e números grandes. */
+  /* Títulos: peso 700 e espaçamento justo (o 800 gritava). */
   .titulo {
     font-family: var(--fonte-titulo), var(--fonte-texto), sans-serif;
-    font-weight: 800;
-    letter-spacing: -0.025em;
-    line-height: 1.05;
+    font-weight: 700;
+    letter-spacing: -0.022em;
+    line-height: 1.08;
   }
 
   .numero {
     font-family: var(--fonte-titulo), var(--fonte-texto), sans-serif;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: -0.02em;
     line-height: 1;
-    font-variant-numeric: lining-nums;
+    font-variant-numeric: lining-nums tabular-nums;
   }
 
-  /* Rótulo curto em caixa alta (filtros, colunas). */
+  /* Rótulo curto (filtros, colunas): em caixa normal, sem o espaçado em
+     caixa alta típico de painel genérico. */
   .rotulo {
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--tinta-3);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--tinta-2);
   }
 
   .cartao {
     background: var(--folha);
     border: 1px solid var(--linha);
-    border-radius: 1.25rem;
+    border-radius: 0.75rem;
   }
 
-  .etiqueta {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    border-radius: 999px;
-    background: var(--azul-claro);
-    color: var(--azul);
-    padding: 0.3rem 0.8rem;
-    font-size: 0.875rem;
-    font-weight: 700;
+  /* Linha de contexto logo abaixo de um título (indicador, público). */
+  .linha-fina {
+    font-size: 1rem;
+    color: var(--tinta-2);
   }
 
   .botao {
@@ -176,9 +185,9 @@ p {
     justify-content: center;
     gap: 0.5rem;
     min-height: 2.75rem;
-    border-radius: 0.75rem;
+    border-radius: 0.5rem;
     padding: 0.5rem 1rem;
-    font-weight: 700;
+    font-weight: 600;
     text-decoration: none;
     transition: background-color 0.2s, border-color 0.2s, color 0.2s;
   }
@@ -193,12 +202,13 @@ p {
   }
 
   .botao-contorno {
-    border: 1.5px solid var(--azul);
+    border: 1px solid #b9cdd5;
     color: var(--azul);
     background: var(--folha);
   }
 
   .botao-contorno:hover {
+    border-color: var(--azul);
     background: var(--azul-claro);
   }
 
@@ -206,14 +216,50 @@ p {
   .seletor {
     appearance: none;
     background: var(--folha)
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='m5.5 8 4.5 4.5L14.5 8' fill='none' stroke='%232156d9' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='m5.5 8 4.5 4.5L14.5 8' fill='none' stroke='%23245a73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
       no-repeat right 0.6rem center / 1.1rem;
-    border: 1px solid #d3ddeb;
-    border-radius: 0.75rem;
-    padding: 0.5rem 2.2rem 0.5rem 0.8rem;
-    font-weight: 700;
+    border: 1px solid var(--campo);
+    border-radius: 0.5rem;
+    padding: 0.5rem 2.2rem 0.5rem 0.75rem;
+    font-weight: 600;
     color: var(--tinta);
     min-height: 2.75rem;
+  }
+
+  .seletor:hover {
+    border-color: var(--azul);
+  }
+
+  /* Escolha entre opções (Vacinação/Casos, 1ª/2ª): faixa única com
+     separadores, sem pílulas. */
+  .alternador {
+    display: flex;
+    border: 1px solid var(--campo);
+    border-radius: 0.5rem;
+    background: var(--folha);
+    overflow: hidden;
+  }
+
+  .alternador > button {
+    min-height: 2.625rem;
+    padding: 0 0.9rem;
+    font-weight: 600;
+    color: var(--tinta-2);
+    transition: background-color 0.15s, color 0.15s;
+  }
+
+  .alternador > button + button {
+    border-left: 1px solid var(--campo);
+  }
+
+  .alternador > button:hover {
+    background: var(--azul-claro);
+    color: var(--azul);
+  }
+
+  .alternador > button[aria-pressed="true"] {
+    background: var(--azul);
+    color: #fff;
   }
 }
 
@@ -251,20 +297,20 @@ p {
   margin-top: 0.625rem;
   border-radius: 50%;
   background: var(--folha);
-  border: 4px solid var(--azul);
+  border: 3px solid var(--azul);
   cursor: grab;
-  box-shadow: 0 2px 6px rgb(23 33 51 / 0.2);
+  box-shadow: 0 1px 3px rgb(38 54 64 / 0.25);
 }
 
 .faixa-anos input[type="range"]::-moz-range-thumb {
   pointer-events: auto;
-  width: 1rem;
-  height: 1rem;
+  width: 1.125rem;
+  height: 1.125rem;
   border-radius: 50%;
   background: var(--folha);
-  border: 4px solid var(--azul);
+  border: 3px solid var(--azul);
   cursor: grab;
-  box-shadow: 0 2px 6px rgb(23 33 51 / 0.2);
+  box-shadow: 0 1px 3px rgb(38 54 64 / 0.25);
 }
 
 .faixa-anos input[type="range"]:focus-visible {

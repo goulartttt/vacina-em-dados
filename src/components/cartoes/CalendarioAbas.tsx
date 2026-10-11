@@ -28,7 +28,7 @@ export function CalendarioAbas({ fases, limite, inicial = 0 }: { fases: Fase[]; 
 
   return (
     <div>
-      <div role="tablist" aria-label="Fase da vida" className="flex flex-wrap gap-1.5" onKeyDown={aoTeclar}>
+      <div role="tablist" aria-label="Fase da vida" className="flex flex-wrap gap-x-4 border-b border-linha" onKeyDown={aoTeclar}>
         {fases.map((f, i) => (
           <button
             key={f.id}
@@ -42,7 +42,7 @@ export function CalendarioAbas({ fases, limite, inicial = 0 }: { fases: Fase[]; 
             aria-controls={`${id}-painel`}
             tabIndex={i === atual ? 0 : -1}
             onClick={() => setAtual(i)}
-            className={`rounded-full px-3 py-1.5 text-sm font-bold transition-colors ${i === atual ? "bg-azul text-white" : "bg-grade text-tinta-2 hover:bg-azul-claro hover:text-azul"}`}
+            className={`-mb-px border-b-2 py-2 text-[0.9375rem] font-semibold transition-colors ${i === atual ? "border-azul text-azul" : "border-transparent text-tinta-2 hover:text-azul"}`}
           >
             {f.nome}
           </button>
@@ -52,10 +52,10 @@ export function CalendarioAbas({ fases, limite, inicial = 0 }: { fases: Fase[]; 
         <p className="text-sm text-tinta-2">
           {fase.nome}: {fase.faixa}
         </p>
-        <ol className="mt-2 grid gap-2">
+        <ol className="mt-2 divide-y divide-grade">
           {doses.map((d) => (
-            <li key={d.quando} className="grid gap-x-3 rounded-xl bg-fundo px-3 py-2.5 @md:grid-cols-[8.5rem_1fr]">
-              <b className="font-titulo">{d.quando}</b>
+            <li key={d.quando} className="grid gap-x-4 py-2.5 @md:grid-cols-[8rem_1fr]">
+              <b className="font-titulo font-bold text-azul">{d.quando}</b>
               <ul className="text-[0.9375rem]">
                 {d.vacinas.map((v) => (
                   <li key={v}>{v}</li>

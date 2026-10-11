@@ -86,7 +86,7 @@ export function Busca({ grande = false, destino = "", rotulo = "Buscar cidade" }
         {rotulo}
       </label>
       <div
-        className={`flex items-center gap-2 rounded-full border border-[#d3ddeb] bg-[#f0f4fa] transition-colors focus-within:border-azul focus-within:bg-folha ${
+        className={`flex items-center gap-2 rounded-lg border border-campo bg-folha transition-colors focus-within:border-azul ${
           grande ? "px-5 py-3.5" : "px-4 py-2"
         }`}
       >
@@ -122,7 +122,7 @@ export function Busca({ grande = false, destino = "", rotulo = "Buscar cidade" }
           id={idLista}
           role="listbox"
           aria-label="Cidades encontradas"
-          className="absolute inset-x-0 top-[calc(100%+6px)] z-40 overflow-hidden rounded-2xl border border-linha bg-folha py-1.5 shadow-[0_16px_36px_-12px_rgb(23_33_51/0.35)]"
+          className="absolute inset-x-0 top-[calc(100%+6px)] z-40 overflow-hidden rounded-lg border border-linha bg-folha py-1.5 shadow-[0_12px_28px_-14px_rgb(38_54_64/0.35)]"
         >
           {erro ? (
             <li className="px-4 py-2.5 text-sm text-tinta-2">Não foi possível carregar a lista. Confira a conexão e tente de novo.</li>

@@ -11,7 +11,7 @@ export function RodapeDados({ fontes }: { fontes: Atualizacao[] }) {
   const sinan = fontes.find((f) => f.fonte === "sinan_sarampo");
   const painel = fontes.find((f) => f.fonte === "pni_cobertura_painel");
   return (
-    <div className="mt-4 rounded-2xl bg-folha/60 px-1 py-2 text-sm text-tinta-3">
+    <div className="mt-4 border-t border-linha pt-3 text-sm text-tinta-2">
       <p>
         <b className="text-tinta-2">Fontes:</b> vacinação, Ministério da Saúde, SI-PNI: arquivos até 2016
         <Fonte fonte={FONTES.datasusPni} rotulo="DATASUS" />, TabNet de 2017 a 2022
